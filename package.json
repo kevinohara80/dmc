@@ -1,0 +1,27 @@
+{
+  "name": "dmc",
+  "version": "0.0.0",
+  "description": "Cross-platform, developer cli tool for Salesforce",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevinohara80/dmc.git"
+  },
+  "keywords": [
+    "salesforce",
+    "force.com",
+    "cli",
+    "nforce",
+    "tooling",
+    "api"
+  ],
+  "author": "Kevin O'Hara",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinohara80/dmc/issues"
+  },
+  "homepage": "https://github.com/kevinohara80/dmc"
+}

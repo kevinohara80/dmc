@@ -8,8 +8,8 @@
   },
   "preferGlobal": "true",
   "bin": {
-    "dmc" : "cli/dmc.js"
-  }
+    "dmc": "cli/dmc.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/kevinohara80/dmc.git"
@@ -29,6 +29,8 @@
   },
   "homepage": "https://github.com/kevinohara80/dmc",
   "devDependencies": {
+    "mocha": "^2.0.1",
+    "should": "^4.1.0"
   },
   "dependencies": {
     "commander": "^2.5.0",

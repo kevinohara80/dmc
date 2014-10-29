@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var fs      = require('fs');
+var colors  = require('colors');
 var path    = require('path');
 var program = require('commander');
 var version = require('../package.json').version;

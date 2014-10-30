@@ -16,6 +16,9 @@ function loadCommand(cmd) {
 
 // load up the individual commands
 loadCommand('init');
+loadCommand('logins');
+loadCommand('login');
+loadCommand('logout');
 loadCommand('deploy');
 
 // bootstraps any necessary config items

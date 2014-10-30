@@ -17,6 +17,9 @@ module.exports = function(program) {
       prompt.confirm('Continue?', false, function(ok) {
         if(ok) {
           run(opts);
+        } else {
+          logger.log('init cancelled. Exiting.');
+          process.exit(0);
         }
       });
     });

@@ -11,7 +11,7 @@ program.version(version)
 
 // helper function to load a command
 function loadCommand(cmd) {
-  require('./commands/' + cmd)(program);
+  require('../commands/' + cmd).cli(program);
 }
 
 // load up the individual commands

@@ -1,13 +1,13 @@
 var fs       = require('fs-extra');
-var user     = require('../../lib/user');
-var prompt   = require('../../lib/prompt');
-var logger   = require('../../lib/logger');
+var user     = require('../lib/user');
+var prompt   = require('../lib/prompt');
+var logger   = require('../lib/logger');
 
-module.exports = function(program) {
+var run = module.exports.run = function(opts) {
+  logger.log('running initialization');
+}
 
-  function run(opts) {
-    logger.log('running initialization');
-  }
+module.exports.cli = function(program) {
 
   program.command('init')
     .description('initialize a project for dmc')

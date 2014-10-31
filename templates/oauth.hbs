@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>DMC OAuth Callback</title>
+  </head>
+  <body>
+    <h1>OAuth Callback</h1>
+    <p id="status">Status: Idle</p>
+    <script type="text/javascript">
+      window.onload = function() {
+        var url = window.location.href.replace('#', '?');
+        var req = new XMLHttpRequest();
+        var completeText = 'Complete! You may now close this window';
+        var errorText = 'Something went wrong!';
+        var statusEl = document.getElementById('status');
+
+        req.onreadystatechange=function() {
+
+          if(req.readyState==4 && req.status==200) {
+            statusEl.innerHTML = completeText;
+          } else {
+            statusEl.innerHTML = errorText;
+          }
+        }
+
+        req.open('POST', url, true);
+        req.setRequestHeader('Content-Type', 'text/plain');
+        statusEl.innerHTML = 'Status: Sending Auth...';
+        req.send();
+      }
+    </script>
+  </body>
+</html>

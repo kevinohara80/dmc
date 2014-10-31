@@ -16,8 +16,8 @@ var run = module.exports.run = function(org, opts) {
     authServer.close();
     logger.log('shutting down server');
     logger.log('saving credentials for ' + org);
-    user.saveCredentials(org, creds);
-    logger.log('complete!');
+    user.saveCredential(org, creds);
+    logger.done();
   });
 
   authServer.listen(3835, function(){

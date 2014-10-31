@@ -2,12 +2,14 @@ var logger = require('../lib/logger');
 var user   = require('../lib/user');
 
 var run = module.exports.run = function(org, opts) {
-  if(!user.hasCredentials(org)) {
+  if(!user.hasCredential(org)) {
     logger.error('org credentials not found: ' + org);
+    logger.done(false)
   } else {
     logger.log('deleting org credentials: ' + org);
-    user.deleteCredentials(org);
+    user.deleteCredential(org);
     logger.log('complete!');
+    logger.done();
   }
 }
 

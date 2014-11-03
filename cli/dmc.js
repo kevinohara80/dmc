@@ -19,7 +19,11 @@ loadCommand('init');
 loadCommand('logins');
 loadCommand('login');
 loadCommand('logout');
+loadCommand('index');
+loadCommand('create');
 loadCommand('deploy');
+loadCommand('anon');
+loadCommand('resources');
 
 // bootstraps any necessary config items
 user.bootstrap();

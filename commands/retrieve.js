@@ -3,15 +3,15 @@ var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 
-var run = module.exports.run = function(org, file, opts, cb) {
+var run = module.exports.run = function(org, meta, opts, cb) {
   cb(new Error('not implemented'));
 };
 
 module.exports.cli = function(program) {
-  program.command('anon <org> <file>')
-    .description('execute anonymous apex <file> in a target <org>')
-    .action(function(org, file, opts) {
+  program.command('retrieve <org> [meta...]')
+    .description('retrieve specified [meta] from target <org>')
+    .action(function(org, meta, opts) {
       cliUtil.checkForOrg(org);
-      run(org, file, opts, cliUtil.callback);
+      run(org, meta, opts, cliUtil.callback);
     });
 };

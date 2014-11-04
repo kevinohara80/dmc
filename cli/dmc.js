@@ -19,9 +19,12 @@ loadCommand('init');
 loadCommand('logins');
 loadCommand('login');
 loadCommand('logout');
+loadCommand('open');
+loadCommand('identity');
 loadCommand('index');
 loadCommand('create');
 loadCommand('deploy');
+loadCommand('retrieve');
 loadCommand('anon');
 loadCommand('resources');
 

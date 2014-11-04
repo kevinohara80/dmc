@@ -1,21 +1,22 @@
 var fs       = require('fs-extra');
 var user     = require('../lib/user');
+var index    = require('../lib/index');
 var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
+var path     = require('path');
 var glob     = require('glob');
 var async    = require('async');
 var _        = require('lodash');
 
-function getFiles(data, cb) {
+function getFiles(globs, cb) {
   var iterator = function(g, cb2) {
     glob(g, {}, cb2);
   };
-  async.concat(data.globs, iterator, function(err, files) {
+  async.concat(globs, iterator, function(err, files) {
     if(err) return cb(err);
     if(!files.length) return cb(new Error('no files found'));
-    data.files = _.uniq(files);
-    cb(err, data);
+    cb(err, _.uniq(files));
   });
 }
 
@@ -25,8 +26,7 @@ function createContainer(data, cb) {
   sfClient.tooling.createContainer({ name: name, oauth: data.org }, function(err, container) {
     if(err) return cb(err);
     logger.log('metadata container created: ' + container.id);
-    data.containerId = container.id;
-    cb(null, data);
+    cb(null, container.id);
   });
 }
 
@@ -77,7 +77,11 @@ function deployContainer(data, cb) {
         return cb(null, data);
       } else if(resp.State === 'Failed') {
         logger.error('CompilerErrors');
-        console.log(resp.CompilerErrors);
+        var cerrs = JSON.parse(resp.CompilerErrors);
+        _.each(cerrs, function(e) {
+          logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
+          logger.error('    Line ' + e.line[0] + ' - ' + e.problem[0]);
+        });
         cb(new Error('Compiler Errors'))
       } else if(resp.State === 'Errored') {
         logger.error('Compile error:');
@@ -126,19 +130,67 @@ function createMetadata(data, cb) {
 
 var run = module.exports.run = function(org, globs, opts, cb) {
 
+  var idx;
+  var containerId;
+  var oauth = user.getCredential(org);
   var data = {
     globs: globs,
     org: user.getCredential(org)
   }
+  var fileMap = {
+    'ApexClass': {},
+    'ApexPage':  {},
+    'ApexComponent': {},
+    'ApexTrigger': {}
+  };
+  var files = [];
 
-  async.waterfall([
+  async.series([
     function(cb2) {
-      getFiles(data, cb2)
+      index.getIndex(org, function(err, i) {
+        if(err) return cb2(err);
+        idx = i;
+        console.log(i);
+        cb2();
+      });
     },
-    createContainer,
-    createMetadata,
-    deployContainer,
-    deleteContainer
+    function(cb2) {
+      getFiles(globs, function(err, resp) {
+        if(err) return cb2(err);
+        files = resp;
+        console.log('files');
+        console.log(files);
+        cb2();
+      });
+    },
+    function(cb2) {
+      _.each(files, function(f) {
+        var ext = path.extname(f);
+        if(ext === '.cls') {
+          var mname = path.basename(f, ext);
+          console.log('mname: ' + mname);
+          fileMap['ApexClass'][mname] = idx.findMetaByName('ApexClass', mname);
+        }
+      });
+      cb2();
+    },
+    function(cb2) {
+      createContainer(data, function(err, cid) {
+        if(err) return cb2(err);
+        containerId = cid;
+        cb2();
+      });
+    },
+    function(cb2) {
+      createMetadata(containerId, files, data.oauth, function(err, resp){
+        if(err) return cb2(err);
+        cb2();
+      });
+    }
+    // createContainer,
+    // createMetadata,
+    // deployContainer,
+    // deleteContainer
   ], function(err, result) {
     if(err) {
       return deleteContainer(data, function(err2) {
@@ -151,6 +203,27 @@ var run = module.exports.run = function(org, globs, opts, cb) {
     }
     cb(null, result);
   });
+
+  // async.waterfall([
+  //   function(cb2) {
+  //     getFiles(data, cb2)
+  //   },
+  //   createContainer,
+  //   createMetadata,
+  //   deployContainer,
+  //   deleteContainer
+  // ], function(err, result) {
+  //   if(err) {
+  //     return deleteContainer(data, function(err2) {
+  //       if(err2) {
+  //         logger.error('unable to delete metadata container');
+  //         logger.error(err2.message);
+  //       }
+  //       cb(err);
+  //     });
+  //   }
+  //   cb(null, result);
+  // });
 }
 
 module.exports.cli = function(program) {

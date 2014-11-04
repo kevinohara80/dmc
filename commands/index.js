@@ -1,4 +1,5 @@
 var user     = require('../lib/user');
+var index    = require('../lib/index');
 var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
@@ -19,13 +20,16 @@ function runIndex(idx, type, oauth, cb) {
 
   q += ' FROM ' + type.name;
 
-  sfClient.tooling.query({ q: q, oauth: oauth }, function(err, recs) {
+  sfClient.tooling.query({ q: q, oauth: oauth }, function(err, resp) {
     if(err) {
       logger.error('indexing failed: ' + type.name);
       logger.error(err.message);
       return cb(err);
     }
-    idx[type.name] = recs.records;
+    _.each(resp.records, function(r) {
+      if(r.attributes) delete r.attributes;
+    });
+    idx.setAllForType(type.name, resp.records);
     return cb();
   });
 }
@@ -41,6 +45,7 @@ function getObjects(oauth, cb) {
     });
     return cb(null, _.pluck(objs.sobjects, 'name'));
   });
+  //return cb(null, ['ApexClass', 'ApexPage', 'ApexComponent', 'ApexTrigger', 'CustomObject']);
 }
 
 function getDescribe(desc, o, oauth, cb) {
@@ -54,21 +59,23 @@ function getDescribe(desc, o, oauth, cb) {
 }
 
 var run = module.exports.run = function(org, opts, cb) {
-  var idx = {};
+
+  var idx;
   var oauth = user.getCredential(org);
-
-  if(user.hasIndex(org)) {
-    idx = user.getIndex(org);
-  }
-
   var objs = [];
   var desc = {};
 
   async.series([
     function(cb2) {
+      index.getIndex(org, function(err, i) {
+        if(err) return cb2(err);
+        idx = i;
+        cb2();
+      });
+    },
+    function(cb2) {
       getObjects(oauth, function(err, resp) {
         if(err) return cb2(err);
-        //console.log(resp);
         objs = resp;
         cb2();
       });
@@ -87,8 +94,7 @@ var run = module.exports.run = function(org, opts, cb) {
     if(err) return cb(err);
     logger.log('index complete');
     logger.log('saving index manifest');
-    user.saveIndex(org, idx);
-    cb();
+    idx.save(cb);
   });
 };
 

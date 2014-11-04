@@ -14,7 +14,7 @@ var run = module.exports.run = function(org, globs, opts) {
     } else {
       logger.log('listing resources:');
       for(var key in res) {
-        logger.log('=> ' + key + ' ' + res[key]);
+        logger.list(key + ' ' + res[key]);
       }
       logger.done();
     }

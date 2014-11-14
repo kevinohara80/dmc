@@ -13,7 +13,7 @@ var run = module.exports.run = function(opts) {
   logger.log('listing all logins:');
 
   creds.forEach(function(c) {
-    logger.log('=> ' + c.name + ' - ' + c.instance_url);
+    logger.list(c.name + ' - ' + c.instance_url);
   });
 
   logger.done();

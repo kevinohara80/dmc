@@ -1,7 +1,6 @@
 var fs       = require('fs-extra');
 var user     = require('../lib/user');
 var index    = require('../lib/index');
-var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 var meta     = require('../lib/metadata');
@@ -9,6 +8,8 @@ var path     = require('path');
 var glob     = require('glob');
 var async    = require('async');
 var _        = require('lodash');
+var logger   = require('../lib/logger');
+var hl       = logger.highlight;
 
 function getFiles(map, globs, cb) {
   var iterator = function(g, cb2) {
@@ -18,13 +19,15 @@ function getFiles(map, globs, cb) {
     if(err) return cb(err);
     if(!files.length) return cb(new Error('no files found'));
     files = _.uniq(files);
-    logger.log('deploying ' + files.length + ' metadata files');
+    logger.log('deploying ' + hl(files.length) + ' metadata files');
     map.addFiles(_.uniq(files));
     cb();
   });
 }
 
 function queryForIds(map, oauth, cb) {
+
+  logger.log('indexing org metadata');
 
   function iterator(type, cb2) {
 
@@ -65,7 +68,7 @@ function createStubFiles(map, oauth, cb) {
 
   function iterator(obj, cb2) {
     obj.oauth = oauth;
-    logger.list('create: ' + obj.type + '::' + obj.object.name);
+    logger.create(obj.type + '::' + hl(obj.object.name));
     sfClient.tooling.insert(obj, function(err, res) {
       if(err) return cb2(err);
       map.setMetaId(obj.type, obj.name, res.id);
@@ -98,31 +101,83 @@ function createStubFiles(map, oauth, cb) {
 }
 
 function createContainer(oauth, cb) {
-  logger.log('creating metadata container')
-  var name = (new Date()).getTime();
+  logger.log('creating container')
+  var name = 'dmc:' + (new Date()).getTime();
   sfClient.tooling.createContainer({ name: name, oauth: oauth }, function(err, container) {
     if(err) return cb(err);
-    logger.log('metadata container created: ' + container.id);
+    logger.create('metadata container: ' + hl(container.id));
     cb(null, container.id);
   });
 }
 
-function deleteContainer(data, cb) {
-  logger.log('deleting metadata container: ' + data.containerId);
+function createMetadata(map, containerId, oauth, cb) {
 
-  var opts = {
-    type: 'MetadataContainer',
-    id: data.containerId,
-    oauth: data.org
-  };
+  logger.log('creating container members');
 
-  sfClient.tooling.delete(opts, function(err, resp) {
-    if(err) return cb(err);
-    cb(null, data);
-  });
+  var types = [
+    'ApexClass',
+    'ApexComponent',
+    'ApexTrigger',
+    'ApexPage'
+  ];
+
+  var iterator = function(meta, cb2) {
+    if(types.indexOf(meta.type) === -1) {
+      logger.log('skipping: ' + meta.name);
+      return cb(null);
+    }
+
+    fs.readFile(meta.path, { encoding: 'utf8' }, function(err, data) {
+      if(err) return cb2(err);
+
+      console.log(data);
+
+      var artifact = sfClient.tooling.createDeployArtifact(meta.type + 'Member', {
+        body: data,
+        contentEntityId: meta.id
+      });
+
+      if(!artifact) {
+        return cb2(new Error('couldn\'t create artifact: ' + meta.name));
+      }
+
+      var opts = {
+        id: containerId,
+        artifact: artifact,
+        oauth: oauth
+      };
+
+      sfClient.tooling.addContainerArtifact(opts, function(err, resp) {
+        if(err) {
+          logger.error('problem creating container artifact');
+          return cb2(err);
+        }
+        logger.create('container member: ' + meta.type + '::' + meta.name);
+        return cb2(null, resp);
+      });
+
+    });
+  }
+
+  // _.map(map.meta, function(val, key) {
+  //   logger.list(key + ' ' + val.length);
+  // });
+
+  var files = _(map.meta)
+    .values()
+    .flatten()
+    .remove(function(m) {
+      return (m.id && m.id !== '')
+    })
+    .value();
+
+  //console.log(files);
+
+  async.map(files, iterator, cb);
+
 }
 
-function deployContainer(data, cb) {
+function deployContainer(containerId, oauth, cb) {
 
   var asyncContainerId;
 
@@ -179,29 +234,17 @@ function deployContainer(data, cb) {
   });
 }
 
-function createMetadata(data, cb) {
-  //var body = fs.readFileSync(process.cwd() + '/' + data.files[0], 'utf8');
-
-  var artifact = sfClient.tooling.createDeployArtifact('ApexClassMember', {
-    body: fs.readFileSync(data.files[0], 'utf8'),
-    contentEntityId: '01pd0000002hG4oAAE'
-  });
-
-  logger.log('using container -> ' + data.containerId);
-  logger.log('uploading -> ' + data.files[0]);
-
+function deleteContainer(containerId, oauth, cb) {
+  logger.log('deleting container');
   var opts = {
-    id: data.containerId,
-    artifact: artifact,
-    oauth: data.org
+    type: 'MetadataContainer',
+    id: containerId,
+    oauth: oauth
   };
-
-  sfClient.tooling.addContainerArtifact(opts, function(err, resp) {
-    if(err) {
-      logger.error('problem creating container artifact')
-      return cb(err);
-    }
-    return cb(null, data);
+  sfClient.tooling.delete(opts, function(err, res) {
+    if(err) return cb(err);
+    logger.destroy('metadata container: ' + hl(containerId));
+    cb(null, containerId);
   });
 }
 
@@ -228,6 +271,12 @@ var run = module.exports.run = function(org, globs, opts, cb) {
         containerId = cid;
         cb2();
       });
+    },
+    function(cb2) {
+      createMetadata(map, containerId, oauth, cb2);
+    },
+    function(cb2) {
+      deleteContainer(containerId, oauth, cb2);
     }
     /*function(cb2) {
       index.getIndex(org, function(err, i) {

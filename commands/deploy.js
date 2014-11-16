@@ -71,7 +71,7 @@ function createStubFiles(map, oauth, cb) {
     logger.create(obj.type + '::' + hl(obj.object.name));
     sfClient.tooling.insert(obj, function(err, res) {
       if(err) return cb2(err);
-      map.setMetaId(obj.type, obj.name, res.id);
+      map.setMetaId(obj.type, obj.object.name, res.id);
       cb2();
     });
   }
@@ -84,6 +84,7 @@ function createStubFiles(map, oauth, cb) {
         return (!o.id || o.id === null || o.id === '');
       })
       .each(function(o) {
+        console.log(o);
         stubs.push(meta.getStub(k, o.name, o.object));
       });
   });
@@ -130,8 +131,6 @@ function createMetadata(map, containerId, oauth, cb) {
     fs.readFile(meta.path, { encoding: 'utf8' }, function(err, data) {
       if(err) return cb2(err);
 
-      console.log(data);
-
       var artifact = sfClient.tooling.createDeployArtifact(meta.type + 'Member', {
         body: data,
         contentEntityId: meta.id
@@ -159,10 +158,6 @@ function createMetadata(map, containerId, oauth, cb) {
     });
   }
 
-  // _.map(map.meta, function(val, key) {
-  //   logger.list(key + ' ' + val.length);
-  // });
-
   var files = _(map.meta)
     .values()
     .flatten()
@@ -182,13 +177,13 @@ function deployContainer(containerId, oauth, cb) {
   var asyncContainerId;
 
   var opts = {
-    id: data.containerId,
+    id: containerId,
     isCheckOnly: false,
-    oauth: data.org
+    oauth: oauth
   }
 
   function logStatus(status) {
-    logger.log('=> deploy status: ' + status);
+    logger.list('deploy status: ' + status);
   }
 
   function poll() {
@@ -206,13 +201,14 @@ function deployContainer(containerId, oauth, cb) {
 
       if(resp.State === 'Completed') {
         logger.log('deployment successful');
-        return cb(null, data);
+        return cb(null, resp);
       } else if(resp.State === 'Failed') {
         logger.error('CompilerErrors');
+        console.log(resp);
         var cerrs = JSON.parse(resp.CompilerErrors);
         _.each(cerrs, function(e) {
           logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
-          logger.error('    Line ' + e.line[0] + ' - ' + e.problem[0]);
+          logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
         });
         cb(new Error('Compiler Errors'))
       } else if(resp.State === 'Errored') {
@@ -228,6 +224,7 @@ function deployContainer(containerId, oauth, cb) {
   }
 
   sfClient.tooling.deployContainer(opts, function(err, asyncContainer) {
+    if(err) return cb(err);
     logger.log('Deploying...');
     asyncContainerId = asyncContainer.id;
     poll();
@@ -252,7 +249,6 @@ var run = module.exports.run = function(org, globs, opts, cb) {
 
   var containerId;
   var oauth = user.getCredential(org);
-
   var map = meta.createMap();
 
   async.series([
@@ -276,57 +272,15 @@ var run = module.exports.run = function(org, globs, opts, cb) {
       createMetadata(map, containerId, oauth, cb2);
     },
     function(cb2) {
+      deployContainer(containerId, oauth, cb2);
+    },
+    function(cb2) {
       deleteContainer(containerId, oauth, cb2);
     }
-    /*function(cb2) {
-      index.getIndex(org, function(err, i) {
-        if(err) return cb2(err);
-        idx = i;
-        //console.log(i);
-        cb2();
-      });
-    },
-    function(cb2) {
-      getFiles(globs, function(err, resp) {
-        if(err) return cb2(err);
-        files = resp;
-        console.log('files');
-        console.log(files);
-        cb2();
-      });
-    },
-    function(cb2) {
-      _.each(files, function(f) {
-        var ext = path.extname(f);
-        if(ext === '.cls') {
-          var mname = path.basename(f, ext);
-          console.log('mname: ' + mname);
-          fileMap['ApexClass'][mname] = idx.findMetaByName('ApexClass', mname);
-        }
-      });
-      cb2();
-    },
-    function(cb2) {
-      createContainer(data, function(err, cid) {
-        if(err) return cb2(err);
-        containerId = cid;
-        cb2();
-      });
-    },
-    function(cb2) {
-      createMetadata(containerId, files, data.oauth, function(err, resp){
-        if(err) return cb2(err);
-        cb2();
-      });
-    }
-    // createContainer,
-    // createMetadata,
-    // deployContainer,
-    // deleteContainer*/
   ], function(err, result) {
     if(err) {
       if(!containerId) return cb(err);
-      return deleteContainer(data, function(err2) {
+      return deleteContainer(containerId, oauth, function(err2) {
         if(err2) {
           logger.error('unable to delete metadata container');
           logger.error(err2.message);

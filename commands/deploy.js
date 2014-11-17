@@ -115,29 +115,22 @@ function createMetadata(map, containerId, oauth, cb) {
 
   logger.log('creating container members');
 
-  var types = [
-    'ApexClass',
-    'ApexComponent',
-    'ApexTrigger',
-    'ApexPage'
-  ];
-
-  var iterator = function(meta, cb2) {
-    if(types.indexOf(meta.type) === -1) {
-      logger.log('skipping: ' + meta.name);
+  var iterator = function(m, cb2) {
+    if(meta.memberTypes.indexOf(m.type) === -1) {
+      logger.log('skipping: ' + m.name);
       return cb(null);
     }
 
-    fs.readFile(meta.path, { encoding: 'utf8' }, function(err, data) {
+    fs.readFile(m.path, { encoding: 'utf8' }, function(err, data) {
       if(err) return cb2(err);
 
-      var artifact = sfClient.tooling.createDeployArtifact(meta.type + 'Member', {
+      var artifact = sfClient.tooling.createDeployArtifact(m.type + 'Member', {
         body: data,
-        contentEntityId: meta.id
+        contentEntityId: m.id
       });
 
       if(!artifact) {
-        return cb2(new Error('couldn\'t create artifact: ' + meta.name));
+        return cb2(new Error('couldn\'t create artifact: ' + m.name));
       }
 
       var opts = {
@@ -151,7 +144,7 @@ function createMetadata(map, containerId, oauth, cb) {
           logger.error('problem creating container artifact');
           return cb2(err);
         }
-        logger.create('container member: ' + meta.type + '::' + meta.name);
+        logger.create('container member: ' + m.type + '::' + m.name);
         return cb2(null, resp);
       });
 

@@ -27,6 +27,7 @@ loadCommand('deploy');
 loadCommand('retrieve');
 loadCommand('anon');
 loadCommand('resources');
+loadCommand('get');
 
 // bootstraps any necessary config items
 user.bootstrap();

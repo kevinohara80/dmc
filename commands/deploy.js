@@ -4,6 +4,7 @@ var index    = require('../lib/index');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 var meta     = require('../lib/metadata');
+var metaMap  = require('../lib/metadata-map');
 var path     = require('path');
 var glob     = require('glob');
 var async    = require('async');
@@ -57,14 +58,16 @@ function queryForIds(map, oauth, cb) {
     });
   }
 
-  async.each(Object.keys(map.meta), iterator, function(err) {
+  // Iterate over all of the stubbable member types
+  async.each(map.getTypesForQuery(), iterator, function(err) {
     if(err) return cb(err);
     cb();
   });
+
 }
 
 function createStubFiles(map, oauth, cb) {
-  var keys = Object.keys(map.meta);
+  var keys = meta.getMemberTypeNames(); //Object.keys(map.meta);
 
   function iterator(obj, cb2) {
     obj.oauth = oauth;
@@ -84,8 +87,7 @@ function createStubFiles(map, oauth, cb) {
         return (!o.id || o.id === null || o.id === '');
       })
       .each(function(o) {
-        console.log(o);
-        stubs.push(meta.getStub(k, o.name, o.object));
+        stubs.push(metaMap.getStub(k, o.name, o.object));
       });
   });
 
@@ -94,12 +96,54 @@ function createStubFiles(map, oauth, cb) {
   async.each(stubs, iterator, function(err) {
     if(err) {
       logger.error('stub file creation failed');
+      logger.error(err);
     } else {
       return cb(null);
     }
   });
 
 }
+
+function createStaticResources(map, oauth, cb) {
+
+  function iterator(obj, cb2) {
+    fs.readFile(obj.path, { encoding: 'base64' }, function(err, body) {
+      if(err) return cb2(err);
+
+      var opts = {
+        id: obj.id,
+        oauth: oauth,
+        type: 'StaticResource',
+        object: {
+          name: obj.name,
+          contenttype: 'application/zip', // hard-coding this for now
+          body: body
+        }
+      };
+
+      var method = (obj.id) ? 'update' : 'insert';
+
+      logger.log('executing StaticResource ' + method);
+
+      sfClient.tooling[method](opts, function(err, res) {
+        if(err) return cb2(err);
+        logger[(method === 'insert') ? 'create' : 'update']('StaticResource::' + obj.name);
+        cb2();
+      });
+
+    });
+  }
+
+  async.mapLimit(map.meta['StaticResource'], 1, iterator, function(err) {
+    if(err) {
+      logger.error('StaticResource deploy error');
+      logger.error(err);
+      return cb(err);
+    }
+    cb();
+  });
+};
+
 
 function createContainer(oauth, cb) {
   logger.log('creating container')
@@ -116,9 +160,8 @@ function createMetadata(map, containerId, oauth, cb) {
   logger.log('creating container members');
 
   var iterator = function(m, cb2) {
-    if(meta.memberTypes.indexOf(m.type) === -1) {
-      logger.log('skipping: ' + m.name);
-      return cb(null);
+    if(meta.getMemberTypeNames().indexOf(m.type) === -1) {
+      return cb2(null);
     }
 
     fs.readFile(m.path, { encoding: 'utf8' }, function(err, data) {
@@ -161,7 +204,7 @@ function createMetadata(map, containerId, oauth, cb) {
 
   //console.log(files);
 
-  async.map(files, iterator, cb);
+  async.mapLimit(files, 5, iterator, cb);
 
 }
 
@@ -197,7 +240,6 @@ function deployContainer(containerId, oauth, cb) {
         return cb(null, resp);
       } else if(resp.State === 'Failed') {
         logger.error('CompilerErrors');
-        console.log(resp);
         var cerrs = JSON.parse(resp.CompilerErrors);
         _.each(cerrs, function(e) {
           logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
@@ -242,7 +284,7 @@ var run = module.exports.run = function(org, globs, opts, cb) {
 
   var containerId;
   var oauth = user.getCredential(org);
-  var map = meta.createMap();
+  var map = metaMap.createMap();
 
   async.series([
     function(cb2) {
@@ -252,9 +294,19 @@ var run = module.exports.run = function(org, globs, opts, cb) {
       queryForIds(map, oauth, cb2);
     },
     function(cb2) {
+      requiresDeploy = map.requiresDeploy();
+      cb2();
+    },
+    function(cb2) {
       createStubFiles(map, oauth, cb2);
     },
     function(cb2) {
+      createStaticResources(map, oauth, cb2);
+    },
+    function(cb2) {
+      if(!map.requiresDeploy()) {
+        return cb2();
+      }
       createContainer(oauth, function(err, cid) {
         if(err) return cb2(err);
         containerId = cid;
@@ -262,12 +314,15 @@ var run = module.exports.run = function(org, globs, opts, cb) {
       });
     },
     function(cb2) {
+      if(!containerId) return cb2();
       createMetadata(map, containerId, oauth, cb2);
     },
     function(cb2) {
+      if(!containerId) return cb2();
       deployContainer(containerId, oauth, cb2);
     },
     function(cb2) {
+      if(!containerId) return cb2();
       deleteContainer(containerId, oauth, cb2);
     }
   ], function(err, result) {

@@ -28,6 +28,7 @@ loadCommand('retrieve');
 loadCommand('anon');
 loadCommand('resources');
 loadCommand('get');
+loadCommand('mdtest');
 
 // bootstraps any necessary config items
 user.bootstrap();

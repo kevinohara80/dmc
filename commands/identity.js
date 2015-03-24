@@ -4,7 +4,6 @@ var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 var _        = require('lodash');
 
-
 function flatten(obj, fields, pre) {
   _.forIn(obj, function(v, k) {
     if(pre) k = pre + '.' + k;
@@ -16,23 +15,26 @@ function flatten(obj, fields, pre) {
   });
 }
 
-var run = module.exports.run = function(org, opts, cb) {
-  var oauth = user.getCredential(org);
+var run = module.exports.run = function(opts, cb) {
+  var oauth = opts.oauth;
 
-  sfClient.getIdentity({ oauth: oauth }, function(err, res){
-    if(err) return cb(err);
-    if(opts.fields) opts.fields = opts.fields.split(',');
+  sfClient.getIdentity({ oauth: opts.oauth }).then(function(res) {
     flatten(res, opts.fields);
     cb();
+  }).catch(function(err) {
+    cb(err);
   });
 };
 
 module.exports.cli = function(program) {
-  program.command('identity <org>')
+  program.command('identity')
     .description('show the identity for target <org>')
+    .option('-o, --org <org>', 'The Salesforce organization to use')
     .option('-f, --fields <fields>', 'Comma-separated fields to show. Use dot notation')
-    .action(function(org, opts) {
-      cliUtil.checkForOrg(org);
-      run(org, opts, cliUtil.callback);
+    .action(function(opts) {
+      cliUtil.checkForOrg(opts.org).then(function(oauth){
+        opts.oauth = oauth;
+        run(opts, cliUtil.callback);
+      });
     });
 };

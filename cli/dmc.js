@@ -30,26 +30,30 @@ loadCommand('resources');
 loadCommand('get');
 
 // bootstraps any necessary config items
-user.bootstrap();
+user.bootstrap().then(function(){
+  // starts the program
+  program.parse(process.argv);
 
-// starts the program
-program.parse(process.argv);
+  if (!program.args.length) {
+    // show help by default
+    program.parse([process.argv[0], process.argv[1], '-h']);
+    process.exit(0);
+  } else if(process.argv.length >= 3) {
+    //warn aboud invalid commands
+    var c = process.argv[2];
 
-if (!program.args.length) {
-  // show help by default
-  program.parse([process.argv[0], process.argv[1], '-h']);
-  process.exit(0);
-} else if(process.argv.length >= 3) {
-  //warn aboud invalid commands
-  var c = process.argv[2];
+    var validCommands = program.commands.map(function(cmd){
+      return cmd._name;
+    });
 
-  var validCommands = program.commands.map(function(cmd){
-    return cmd._name;
-  });
-
-  if(validCommands.indexOf(c) === -1) {
-    logger.error('Invalid command: \'' + c + '\'');
-    program.help();
-    process.exit(1);
+    if(validCommands.indexOf(c) === -1) {
+      logger.error('Invalid command: \'' + c + '\'');
+      program.help();
+      process.exit(1);
+    }
   }
-}
+}).catch(function(err) {
+  logger.error('Unable to bootstrap necessary directories');
+  logger.error(err.message);
+  process.exit(1);
+});

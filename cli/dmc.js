@@ -7,7 +7,7 @@ var logger  = require('../lib/logger');
 var version = require('../package.json').version;
 var user    = require('../lib/user');
 
-program.version(version)
+program.version(version);
 
 // helper function to load a command
 function loadCommand(cmd) {
@@ -28,7 +28,6 @@ loadCommand('retrieve');
 loadCommand('anon');
 loadCommand('resources');
 loadCommand('get');
-loadCommand('mdtest');
 
 // bootstraps any necessary config items
 user.bootstrap();
@@ -51,6 +50,6 @@ if (!program.args.length) {
   if(validCommands.indexOf(c) === -1) {
     logger.error('Invalid command: \'' + c + '\'');
     program.help();
-    process.exit(0);
+    process.exit(1);
   }
 }

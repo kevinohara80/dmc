@@ -2,23 +2,7 @@ var logger  = require('../lib/logger');
 var user    = require('../lib/user');
 var cliUtil = require('../lib/cli-util.js');
 
-
 var run = module.exports.run = function(opts, cb) {
-  // var creds = user.listCredentials();
-  //
-  // if(!creds || creds.length === 0) {
-  //   logger.log('no logins found!');
-  //   return logger.done();
-  // }
-  //
-  // logger.log('listing all logins:');
-  //
-  // creds.forEach(function(c) {
-  //   logger.list(c.name + ' - ' + c.instance_url);
-  // });
-  //
-  // logger.done();
-
   user.listCredentials().then(function(creds) {
     if(!creds || creds.length === 0) {
       logger.log('no logins found!');
@@ -30,9 +14,9 @@ var run = module.exports.run = function(opts, cb) {
     creds.forEach(function(c) {
       logger.list(c.name + ' - ' + c.instance_url);
     });
-    cb();
+    cb(null, creds);
   }).catch(function(err) {
-    throw err;
+    cb(err);
   });
 };
 

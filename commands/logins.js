@@ -14,6 +14,7 @@ var run = module.exports.run = function(opts, cb) {
     creds.forEach(function(c) {
       logger.list(c.name + ' - ' + c.instance_url);
     });
+    
     cb(null, creds);
   }).catch(function(err) {
     cb(err);

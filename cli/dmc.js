@@ -15,19 +15,20 @@ function loadCommand(cmd) {
 }
 
 // load up the individual commands
-loadCommand('init');
-loadCommand('logins');
-loadCommand('login');
-loadCommand('logout');
-loadCommand('open');
+// loadCommand('init');
+loadCommand('config');
+// loadCommand('logins');
+// loadCommand('login');
+// loadCommand('logout');
+// loadCommand('open');
 loadCommand('identity');
-loadCommand('index');
-loadCommand('create');
-loadCommand('deploy');
-loadCommand('retrieve');
-loadCommand('anon');
-loadCommand('resources');
-loadCommand('get');
+// loadCommand('index');
+// loadCommand('create');
+// loadCommand('deploy');
+// loadCommand('retrieve');
+// loadCommand('anon');
+// loadCommand('resources');
+// loadCommand('get');
 
 // bootstraps any necessary config items
 user.bootstrap().then(function(){

@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-var fs      = require('fs');
 var colors  = require('colors');
-var path    = require('path');
 var program = require('commander');
 var logger  = require('../lib/logger');
 var version = require('../package.json').version;
@@ -17,7 +15,7 @@ function loadCommand(cmd) {
 // load up the individual commands
 // loadCommand('init');
 loadCommand('config');
-// loadCommand('logins');
+loadCommand('logins');
 // loadCommand('login');
 // loadCommand('logout');
 // loadCommand('open');

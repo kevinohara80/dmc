@@ -13,8 +13,9 @@ function loadCommand(cmd) {
 }
 
 // load up the individual commands
-// loadCommand('init');
+loadCommand('init');
 loadCommand('config');
+loadCommand('config-set');
 loadCommand('logins');
 // loadCommand('login');
 // loadCommand('logout');
@@ -33,11 +34,12 @@ user.bootstrap().then(function(){
   // starts the program
   program.parse(process.argv);
 
-  if (!program.args.length) {
+  if (process.argv.length < 3) {
     // show help by default
     program.parse([process.argv[0], process.argv[1], '-h']);
+    logger.error('incorrect number of arguments');
     process.exit(0);
-  } else if(process.argv.length >= 3) {
+  } else {
     //warn aboud invalid commands
     var c = process.argv[2];
 
@@ -52,6 +54,7 @@ user.bootstrap().then(function(){
     }
   }
 }).catch(function(err) {
+  console.error(err.stack);
   logger.error('Unable to bootstrap necessary directories');
   logger.error(err.message);
   process.exit(1);

@@ -1,13 +1,16 @@
-var fs       = require('fs-extra');
-var user     = require('../lib/user');
+var config   = require('../lib/config');
+var cliUtil  = require('../lib/cli-util');
 var prompt   = require('../lib/prompt');
 var logger   = require('../lib/logger');
-var project  = require('../lib/project');
 
-var run = module.exports.run = function(opts) {
-  logger.log('Initializing new dmc project');
-  project.bootstrap();
-  logger.log('init complete');
+var run = module.exports.run = function(opts, cb) {
+  logger.log('Initializing local dmc project config');
+  logger.log('writing ' + process.cwd() + '/dmc_config.json');
+  config.local().init().then(function(){
+    cb();
+  }).catch(function(err) {
+    cb(err);
+  });
 }
 
 module.exports.cli = function(program) {
@@ -15,11 +18,11 @@ module.exports.cli = function(program) {
   program.command('init')
     .description('initialize a project for dmc')
     .action(function(opts) {
-      logger.log('This action will initialize a new dmcfile and');
-      logger.log('remove any existing dmcfile in this project.');
+      logger.log('This action will initialize a new dmc_config.json and');
+      logger.log('remove any existing dmc_config.json in this project.');
       prompt.confirm('Continue?', false, function(ok) {
         if(ok) {
-          run(opts);
+          run(opts, cliUtil.callback);
         } else {
           logger.log('init cancelled. Exiting.');
           process.exit(0);

@@ -20,10 +20,22 @@ var run = module.exports.run = function(items, opts, cb) {
   }
 
   cfg.load().then(function(){
+
+    if(!cfg.exists()) {
+      if(!opts.global) {
+        logger.log('no local configuration found.');
+        logger.log('try running ' + logger.highlight('dmc init') +
+          ' to initialize a local config');
+      }
+      return cb(new Error('config not found'));
+    }
+
     var parsed = config.parse(items);
+
     _.map(parsed, function(v, k) {
       logger.list(k + ': ' + cfg.get(k) + ' => ' + v);
     });
+    
     return cfg.save(parsed);
   }).then(function(){
     logger.log('configuration saved');

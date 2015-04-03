@@ -17,7 +17,7 @@ var run = module.exports.run = function(org, url, opts) {
       logger.done();
     }
   });
-}
+};
 
 module.exports.cli = function(program) {
   program.command('get <org> <url>')

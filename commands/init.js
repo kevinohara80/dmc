@@ -11,7 +11,7 @@ var run = module.exports.run = function(opts, cb) {
   }).catch(function(err) {
     cb(err);
   });
-}
+};
 
 module.exports.cli = function(program) {
 

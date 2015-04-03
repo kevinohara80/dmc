@@ -29,7 +29,7 @@ var run = module.exports.run = function(org, opts, cb) {
       cb(null);
     }
   });
-}
+};
 
 var cli = module.exports.cli = function(program) {
   program.command('logout <org>')

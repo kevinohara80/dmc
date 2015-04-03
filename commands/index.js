@@ -53,7 +53,7 @@ function getDescribe(desc, o, oauth, cb) {
 
   sfClient.tooling.getDescribe({ oauth: oauth, type: o }, function(err, d) {
     if(err) return cb(err);
-    desc[o] = d
+    desc[o] = d;
     return cb();
   });
 }

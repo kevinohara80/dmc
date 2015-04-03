@@ -47,9 +47,9 @@ var run = module.exports.run = function(items, opts, cb) {
 
 
 module.exports.cli = function(program) {
-  program.command('config-set [items...]')
-    .description('set configuration variables')
-    .option('-g, --global', 'Set the global config variable. Otherwise, local variable set')
+  program.command('config-unset [items...]')
+    .description('unset configuration variables')
+    .option('-g, --global', 'Unset the global config variable. Otherwise, local variable unset')
     .action(function(items, opts) {
       run(items, opts, cliUtil.callback);
     });

@@ -134,7 +134,7 @@ function createStaticResources(map, oauth, cb) {
     });
   }
 
-  async.mapLimit(map.meta['StaticResource'], 1, iterator, function(err) {
+  async.mapLimit(map.meta.StaticResource, 1, iterator, function(err) {
     if(err) {
       logger.error('StaticResource deploy error');
       logger.error(err);
@@ -142,11 +142,11 @@ function createStaticResources(map, oauth, cb) {
     }
     cb();
   });
-};
+}
 
 
 function createContainer(oauth, cb) {
-  logger.log('creating container')
+  logger.log('creating container');
   var name = 'dmc:' + (new Date()).getTime();
   sfClient.tooling.createContainer({ name: name, oauth: oauth }, function(err, container) {
     if(err) return cb(err);
@@ -192,13 +192,13 @@ function createMetadata(map, containerId, oauth, cb) {
       });
 
     });
-  }
+  };
 
   var files = _(map.meta)
     .values()
     .flatten()
     .remove(function(m) {
-      return (m.id && m.id !== '')
+      return (m.id && m.id !== '');
     })
     .value();
 
@@ -216,7 +216,7 @@ function deployContainer(containerId, oauth, cb) {
     id: containerId,
     isCheckOnly: false,
     oauth: oauth
-  }
+  };
 
   function logStatus(status) {
     logger.list('deploy status: ' + status);
@@ -245,7 +245,7 @@ function deployContainer(containerId, oauth, cb) {
           logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
           logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
         });
-        cb(new Error('Compiler Errors'))
+        cb(new Error('Compiler Errors'));
       } else if(resp.State === 'Errored') {
         logger.error('Compile error:');
         logger.error(res.ErrorMsg);

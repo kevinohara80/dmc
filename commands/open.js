@@ -16,7 +16,9 @@ var run = module.exports.run = function(org, opts, cb) {
 
     oauth = user.getCredential(org);
 
-    var url = oauth.instance_url + '/secur/frontdoor.jsp?sid=' + oauth.access_token
+    var url = oauth.instance_url +
+      '/secur/frontdoor.jsp?sid=' +
+      oauth.access_token;
 
     logger.log('opening: ' + org);
 

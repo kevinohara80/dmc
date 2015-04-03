@@ -1,0 +1,6 @@
+{
+  "node": true,
+  "curly": false,
+  "eqeqeq": true,
+  "predef": [ "-Promise" ]
+}

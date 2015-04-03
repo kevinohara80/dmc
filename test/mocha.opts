@@ -1,0 +1,6 @@
+--growl
+--check-leaks
+--require should
+--require ./test/util/global.js
+--reporter spec
+--recursive

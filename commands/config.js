@@ -37,7 +37,7 @@ var run = module.exports.run = function(opts, cb) {
       .value();
 
   }).catch(function(err) {
-    cb(err)
+    cb(err);
   });
 };
 

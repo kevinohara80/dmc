@@ -19,7 +19,7 @@ var run = module.exports.run = function(org, opts) {
       logger.done();
     }
   });
-}
+};
 
 module.exports.cli = function(program) {
   program.command('resources <org>')

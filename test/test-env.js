@@ -3,6 +3,10 @@ var fs     = require('fs');
 
 describe('test environment', function() {
 
+  it('should set the environment variable TEST_MODE to true', function(){
+    process.isTestMode.should.equal(true);
+  });
+
   it('should have a tmp directory for testing', function(done){
 
     var localTmp = __dirname + '/.tmp';

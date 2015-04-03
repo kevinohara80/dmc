@@ -3,12 +3,16 @@ var path = require('path');
 
 var tmpDir = path.resolve(__dirname, '../.tmp');
 
-var clearSync = module.exports.clearSync = function(cb) {
-  if(!fs.existsSync(tmpDir)) return;
+var existsSync = module.exports.existsSync = function() {
+  return fs.existsSync(tmpDir);
+};
+
+var clearSync = module.exports.clearSync = function() {
+  if(!existsSync(tmpDir)) return;
   fs.rmdirSync(tmpDir);
 };
 
-var initSync = module.exports.initSync = function(cb) {
+var initSync = module.exports.initSync = function() {
   if(fs.existsSync(tmpDir)) {
     clearSync();
   }

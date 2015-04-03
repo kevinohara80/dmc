@@ -1,7 +1,12 @@
 var should = require('should');
+var tmp    = require('./util/tmp');
 var fs     = require('fs');
 
 describe('test environment', function() {
+
+  beforeEach(function(){
+    tmp.initSync();
+  });
 
   it('should set the environment variable TEST_MODE to true', function(){
     process.isTestMode.should.equal(true);
@@ -16,6 +21,10 @@ describe('test environment', function() {
       else done();
     });
 
+  });
+
+  after(function(){
+    tmp.clearSync();
   });
 
 });

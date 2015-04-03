@@ -6,7 +6,7 @@ var tmpDirPath   = path.resolve(__dirname, './.tmp');
 
 // directories
 var homeDirPath  = tmpDirPath + '/user_home';
-var localDirPath = tmpDirPath + '/project'
+var localDirPath = tmpDirPath + '/project';
 var authDirPath  = homeDirPath + '/auth';
 var indexDirPath = homeDirPath + '/index';
 

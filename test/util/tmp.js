@@ -1,5 +1,6 @@
-var fs   = require('fs-extra');
-var path = require('path');
+var fs     = require('fs-extra');
+var path   = require('path');
+var rimraf = require('rimraf');
 
 var tmpDir = path.resolve(__dirname, '../.tmp');
 
@@ -9,7 +10,7 @@ var existsSync = module.exports.existsSync = function() {
 
 var clearSync = module.exports.clearSync = function() {
   if(!existsSync(tmpDir)) return;
-  fs.rmdirSync(tmpDir);
+  rimraf.sync(tmpDir);
 };
 
 var initSync = module.exports.initSync = function() {
@@ -17,4 +18,6 @@ var initSync = module.exports.initSync = function() {
     clearSync();
   }
   fs.mkdirSync(tmpDir);
+  fs.mkdirSync(tmpDir + '/user_home');
+  fs.mkdirSync(tmpDir + '/project');
 };

@@ -1,3 +1,4 @@
-console.log('TEST GLOBAL CONFIG')
-console.log('process.env[TEST_MODE] = true');
+// set this variable to true so that
+// we can access it's value within
+// modules and modify the behavior
 process.isTestMode = true;

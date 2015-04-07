@@ -22,7 +22,9 @@ var run = module.exports.run = function(opts, cb) {
     return user.deleteCredential(opts.oauth.nick);
   }).then(function(){
     cb();
-  }).catch(cb);
+  }).catch(function(err) {
+    cb(err);
+  });
 };
 
 var cli = module.exports.cli = function(program) {

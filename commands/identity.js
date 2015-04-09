@@ -1,8 +1,9 @@
-var user     = require('../lib/user');
-var logger   = require('../lib/logger');
-var cliUtil  = require('../lib/cli-util');
-var sfClient = require('../lib/sf-client');
-var _        = require('lodash');
+var user       = require('../lib/user');
+var logger     = require('../lib/logger');
+var cliUtil    = require('../lib/cli-util');
+var sfClient   = require('../lib/sf-client');
+var resolveOrg = require('../lib/resolve-org');
+var _          = require('lodash');
 
 function flatten(obj, fields, pre) {
   _.forIn(obj, function(v, k) {
@@ -28,13 +29,13 @@ var run = module.exports.run = function(opts, cb) {
 
 module.exports.cli = function(program) {
   program.command('identity')
-    .description('show the identity for target <org>')
+    .description('show the identity for the specified org')
     .option('-o, --org <org>', 'The Salesforce organization to use')
     .option('-f, --fields <fields>', 'Comma-separated fields to show. Use dot notation')
     .action(function(opts) {
-      cliUtil.checkForOrg(opts.org).then(function(oauth){
+      resolveOrg(opts.org).then(function(oauth){
         opts.oauth = oauth;
         run(opts, cliUtil.callback);
-      });
+      }).catch(cliUtil.callback);
     });
 };

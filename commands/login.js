@@ -17,6 +17,8 @@ var run = module.exports.run = function(opts) {
     authServer.close();
     logger.log('shutting down server');
     logger.log('saving credentials for ' + opts.org);
+    creds.nick = opts.org;
+    creds.org = opts.org;
     user.saveCredential(opts.org, creds);
     logger.done();
   });

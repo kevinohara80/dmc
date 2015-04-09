@@ -13,7 +13,7 @@ var run = module.exports.run = function(opts, cb) {
 
     var keys = [];
 
-    if(opts.resolve) {
+    if(!opts.global && !opts.local) {
       logger.log('resolving config variables');
       keys = _.keys(l.getData()).concat(_.keys(g.getData()));
     } else if(opts.global) {
@@ -28,7 +28,7 @@ var run = module.exports.run = function(opts, cb) {
       .uniq()
       .sort()
       .each(function(k) {
-        if(!_.isUndefined(l.get(k)) && (opts.resolve || !opts.global)) {
+        if(!_.isUndefined(l.get(k)) && !_.isNull(l.get(k)) && (!opts.global)) {
           logger.list(k + ': ' + l.get(k) + ' (local)');
         } else {
           logger.list(k + ': ' + g.get(k) + ' (global)');
@@ -44,9 +44,9 @@ var run = module.exports.run = function(opts, cb) {
 
 module.exports.cli = function(program) {
   program.command('config')
-    .description('show a dmc global or local configuration')
-    .option('-g, --global', 'Show the global config. If not specified, the project config will be shown')
-    .option('--resolve', 'Show the resolution of local to global configuration values')
+    .description('show the resolved dmc configuration')
+    .option('-g, --global', 'Show the global config')
+    .option('-l, --local', 'Show the local config')
     .action(function(opts) {
       run(opts, cliUtil.callback);
     });

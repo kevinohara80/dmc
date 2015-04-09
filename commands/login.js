@@ -2,12 +2,13 @@ var logger     = require('../lib/logger');
 var sfclient   = require('../lib/sf-client');
 var authServer = require('../lib/auth-server');
 var sfClient   = require('../lib/sf-client');
+var cliUtil    = require('../lib/cli-util');
 var spawn      = require('child_process').spawn;
 var user       = require('../lib/user');
 
 var authUri = sfClient.getAuthUri({ responseType: 'token' });
 
-var run = module.exports.run = function(org, opts) {
+var run = module.exports.run = function(opts) {
 
   logger.log('login starts...');
 
@@ -15,8 +16,8 @@ var run = module.exports.run = function(org, opts) {
     logger.log('received credentials');
     authServer.close();
     logger.log('shutting down server');
-    logger.log('saving credentials for ' + org);
-    user.saveCredential(org, creds);
+    logger.log('saving credentials for ' + opts.org);
+    user.saveCredential(opts.org, creds);
     logger.done();
   });
 
@@ -30,11 +31,11 @@ var run = module.exports.run = function(org, opts) {
 };
 
 var cli = module.exports.cli = function(program) {
-  program.command('login <org>')
+  program.command('login')
     .description('login to a Salesforce organization')
-    .option('-u <user>', 'your salesforce username')
-    .option('-p <pass>', 'your salesforce password')
-    .action(function(org, opts) {
-      run(org, opts);
+    .option('-o, --org <org>', 'The Salesforce organization to use')
+    .action(function(opts) {
+      if(!opts.org) cliUtil.fail('no org name specified');
+      run(opts);
     });
 };

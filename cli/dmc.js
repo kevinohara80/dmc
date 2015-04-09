@@ -5,7 +5,18 @@ var logger  = require('../lib/logger');
 var version = require('../package.json').version;
 var user    = require('../lib/user');
 
-program.version(version);
+// set initial log level
+logger.setLogLevel(1);
+
+// create the program
+program
+  .version(version)
+  .option('--verbose', 'use verbose logging', function(){
+    logger.setLogLevel(2);
+  })
+  .option('--silent', 'skip logging', function(){
+    logger.setLogLevel(0);
+  });
 
 // helper function to load a command
 function loadCommand(cmd) {
@@ -19,14 +30,14 @@ loadCommand('config-set');
 loadCommand('logins');
 loadCommand('login');
 loadCommand('logout');
-// loadCommand('open');
+loadCommand('open');
 loadCommand('identity');
 // loadCommand('index');
 // loadCommand('create');
 // loadCommand('deploy');
 // loadCommand('retrieve');
 // loadCommand('anon');
-// loadCommand('resources');
+loadCommand('resources');
 // loadCommand('get');
 
 // bootstraps any necessary config items

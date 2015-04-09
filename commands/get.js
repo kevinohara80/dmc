@@ -20,10 +20,11 @@ var run = module.exports.run = function(org, url, opts) {
 };
 
 module.exports.cli = function(program) {
-  program.command('get <org> <url>')
-    .description('GET a tooling API url')
-    .action(function(org, url, opts) {
-      cliUtil.checkForOrg(org);
-      run(org, url, opts);
+  program.command('get <url>')
+    .description('get a REST API url')
+    .option('-o, --org <org>', 'The Salesforce organization to use')
+    .action(function(url, opts) {
+      opts.url = url;
+      return cliUtil.executeRun(run)(opts);
     });
 };

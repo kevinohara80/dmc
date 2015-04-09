@@ -3,9 +3,9 @@ var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var _        = require('lodash');
 
-var run = module.exports.run = function(items, opts, cb) {
+var run = module.exports.run = function(opts, cb) {
 
-  if(!items || items.length === 0) {
+  if(!opts.items || opts.items.length === 0) {
     cb(new Error('You must supply config items to set'));
   }
 
@@ -30,7 +30,7 @@ var run = module.exports.run = function(items, opts, cb) {
       return cb(new Error('config not found'));
     }
 
-    var parsed = config.parse(items);
+    var parsed = config.parse(opts.items);
 
     _.map(parsed, function(v, k) {
       logger.list(k + ': ' + cfg.get(k) + ' => ' + v);
@@ -51,6 +51,7 @@ module.exports.cli = function(program) {
     .description('set configuration variables')
     .option('-g, --global', 'Set the global config variable. Otherwise, local variable set')
     .action(function(items, opts) {
-      run(items, opts, cliUtil.callback);
+      opts.items = items;
+      return cliUtil.executeRun(run)(opts);
     });
 };

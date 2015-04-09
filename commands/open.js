@@ -1,26 +1,23 @@
-var user     = require('../lib/user');
-var logger   = require('../lib/logger');
-var cliUtil  = require('../lib/cli-util');
-var sfClient = require('../lib/sf-client');
-var identity = require('./identity');
-var spawn    = require('child_process').spawn;
+var user       = require('../lib/user');
+var logger     = require('../lib/logger');
+var cliUtil    = require('../lib/cli-util');
+var sfClient   = require('../lib/sf-client');
+var identity   = require('./identity');
+var resolveOrg = require('../lib/resolve-org');
+var spawn      = require('child_process').spawn;
 
-var run = module.exports.run = function(org, opts, cb) {
+var run = module.exports.run = function(opts, cb) {
 
-  var oauth = user.getCredential(org);
-
-  sfClient.getIdentity({ oauth: oauth }, function(err, res) {
+  sfClient.getIdentity({ oauth: opts.oauth }, function(err, res) {
     if(err) return cb(err);
 
     logger.log('logging in: ' + res.username);
 
-    oauth = user.getCredential(org);
-
-    var url = oauth.instance_url +
+    var url = opts.oauth.instance_url +
       '/secur/frontdoor.jsp?sid=' +
-      oauth.access_token;
+      opts.oauth.access_token;
 
-    logger.log('opening: ' + org);
+    logger.log('opening: ' + opts.org);
 
     var open = spawn('open', [url]);
 
@@ -34,10 +31,11 @@ var run = module.exports.run = function(org, opts, cb) {
 };
 
 module.exports.cli = function(program) {
-  program.command('open <org>')
-    .description('open the target <org> in a browser window')
+  program.command('open [org]')
+    .description('open the target org in a browser window')
+    .option('-o, --org <org>', 'The Salesforce organization to use')
     .action(function(org, opts) {
-      cliUtil.checkForOrg(org);
-      run(org, opts, cliUtil.callback);
+      opts.org = org || opts.org;
+      return cliUtil.executeRun(run)(opts);
     });
 };

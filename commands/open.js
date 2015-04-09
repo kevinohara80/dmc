@@ -3,7 +3,6 @@ var logger     = require('../lib/logger');
 var cliUtil    = require('../lib/cli-util');
 var sfClient   = require('../lib/sf-client');
 var identity   = require('./identity');
-var resolveOrg = require('../lib/resolve-org');
 var spawn      = require('child_process').spawn;
 
 var run = module.exports.run = function(opts, cb) {

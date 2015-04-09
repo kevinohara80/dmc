@@ -5,7 +5,6 @@ var sfClient   = require('../lib/sf-client');
 var cliUtil    = require('../lib/cli-util');
 var config     = require('../lib/config');
 var async      = require('async');
-var resolveOrg = require('../lib/resolve-org');
 
 var run = module.exports.run = function(opts, cb) {
 

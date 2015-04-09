@@ -2,7 +2,6 @@ var user       = require('../lib/user');
 var logger     = require('../lib/logger');
 var cliUtil    = require('../lib/cli-util');
 var sfClient   = require('../lib/sf-client');
-var resolveOrg = require('../lib/resolve-org');
 var _          = require('lodash');
 
 function flattenAndFilter(obj, fields, pre) {

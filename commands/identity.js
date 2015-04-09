@@ -5,11 +5,11 @@ var sfClient   = require('../lib/sf-client');
 var resolveOrg = require('../lib/resolve-org');
 var _          = require('lodash');
 
-function flatten(obj, fields, pre) {
+function flattenAndFilter(obj, fields, pre) {
   _.forIn(obj, function(v, k) {
     if(pre) k = pre + '.' + k;
     if(_.isObject(v)) {
-      flatten(v, fields, k);
+      flattenAndFilter(v, fields, k);
     } else if(!fields || !fields.length || fields.indexOf(k) !== -1) {
       logger.list(k + ': ' + v);
     }
@@ -20,7 +20,7 @@ var run = module.exports.run = function(opts, cb) {
   var oauth = opts.oauth;
 
   sfClient.getIdentity({ oauth: opts.oauth }).then(function(res) {
-    flatten(res, opts.fields);
+    flattenAndFilter(res, opts.fields);
     cb();
   }).catch(function(err) {
     cb(err);

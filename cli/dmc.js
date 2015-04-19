@@ -34,7 +34,7 @@ loadCommand('open');
 loadCommand('identity');
 // loadCommand('index');
 // loadCommand('create');
-// loadCommand('deploy');
+loadCommand('deploy');
 // loadCommand('retrieve');
 // loadCommand('anon');
 loadCommand('resources');

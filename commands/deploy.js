@@ -5,6 +5,7 @@ var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 var meta     = require('../lib/metadata');
 var metaMap  = require('../lib/metadata-map');
+var Promise  = require('bluebird');
 var path     = require('path');
 var glob     = require('glob');
 var async    = require('async');
@@ -280,11 +281,13 @@ function deleteContainer(containerId, oauth, cb) {
   });
 }
 
-var run = module.exports.run = function(org, globs, opts, cb) {
+var run = module.exports.run = function(opts, cb) {
 
   var containerId;
-  var oauth = user.getCredential(org);
-  var map = metaMap.createMap();
+  var meta  = opts.meta;
+  var oauth = opts.oauth;
+  var globs = opts.meta;
+  var map   = metaMap.createMap();
 
   async.series([
     function(cb2) {
@@ -336,15 +339,16 @@ var run = module.exports.run = function(org, globs, opts, cb) {
         cb(err);
       });
     }
-    cb(null, result);
+    cb();
   });
 };
 
 module.exports.cli = function(program) {
-  program.command('deploy <org> [meta...]')
+  program.command('deploy [meta...]')
     .description('deploy metadata to target <org>')
-    .action(function(org, globs, opts) {
-      cliUtil.checkForOrg(org);
-      run(org, globs, opts, cliUtil.callback);
+    .option('-o, --org <org>', 'The Salesforce organization to use')
+    .action(function(meta, opts) {
+      opts.meta = meta;
+      return cliUtil.executeRun(run)(opts);
     });
 };

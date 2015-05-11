@@ -296,7 +296,73 @@ function runToolingDeploy(map, oauth) {
       }
     });
 
+}
 
+function logDetails(res) {
+  if(!res.details) return;
+
+  var cType;
+  var method;
+
+  if(res.details.componentSuccesses) {
+    logger.success('component successes ====>');
+
+    _(res.details.componentSuccesses)
+      .map(function(e) {
+        e.cType = _.isString(e.componentType) ?
+          (e.componentType + ': ') :
+          '';
+
+        e.method =
+          (e.created) ? 'create'  :
+          (e.changed) ? 'update'  :
+          (e.deleted) ? 'destroy' :
+          'noChange';
+
+        return e;
+      })
+      .sortBy(function(e) {
+        return e.cType + e.fullName;
+      })
+      .each(function(e) {
+        logger[e.method](e.cType + e.fullName);
+      })
+      .value();
+  }
+
+  if(res.details.componentFailures) {
+    logger.error('component failures ====>');
+
+    _(res.details.componentFailures)
+      .map(function(e) {
+        e.cType = _.isString(e.componentType) ?
+          (e.componentType + ': ') :
+          '';
+
+        return e;
+      })
+      .sortBy(function(e) {
+        return e.cType + e.fullName;
+      })
+      .each(function(e) {
+        logger.listError(
+          '[' + e.cType + e.fullName + '] ' +
+          e.problemType + ' at ' +
+          'l:' + (e.lineNumber || '0') + '/' +
+          'c:' + (e.columnNumber || '0') + ' '  +
+          '=> ' +
+          e.problem
+        );
+      })
+      .value();
+  }
+
+  if(res.details.numTestsRun && res.details.numTestsRun > 0) {
+    logger.log('test results ====>');
+    logger.list('tests run: ' + e.numTestsRun);
+    logger.list('failures: ' + e.numFailures);
+    logger.list('total time: ' + e.totalTime);
+  }
 }
 
 function runMetadataDeploy(map, oauth) {
@@ -305,57 +371,84 @@ function runMetadataDeploy(map, oauth) {
   return new Promise(function(resolve, reject) {
     var archive = archiver('zip');
 
-    // var output = require('fs-extra').createWriteStream(process.cwd() + '/example-output.zip');
-    //
-    // archive.pipe(output);
-
-    archive.append(new Buffer([
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<Package xmlns="http://soap.sforce.com/2006/04/metadata">',
-      '  <types>',
-      '    <members>Test_Object__c</members>',
-      '    <name>CustomObject</name>',
-      '  </types>',
-      '</Package>'
-    ].join('\n')), { name: 'src/package.xml' });
-
-    //archive.file('src/objects/Test_Object__c.object');
-
     var promise = sfClient.meta.deployAndPoll({
       zipFile: archive,
       oauth: oauth,
       includeDetails: true
     });
 
-    archive.finalize();
+    // write the package.xml to the zip
+    archive.append(
+      new Buffer(map.createPackageXML(sfClient.apiVersion)
+    ), { name: 'src/package.xml' });
 
     promise.poller.on('poll', function(res) {
       logger.log('deploy status: ' + hl(res.status));
     });
 
     promise.then(function(results){
-      console.log(results);
+      logDetails(results);
       resolve();
     }).catch(function(err) {
-      if(err.details && err.details.componentFailures) {
-        _.each(err.details.componentFailures, function(e) {
-          logger.error('component failures');
-          logger.list(e.problem);
-        })
-      } else if(err.details && err.details.runTestResult) {
-
+      if(err.details) {
+        logDetails(err);
+      } else {
+        logger.error(err.message);
       }
       reject(new Error('metatadata api deployment failed'));
     });
 
-  })
+    // iterator for adding files
+    // checks for existence and adds
+    function iterator(p, cb) {
+      fs.existsAsync(p).then(function(exists) {
+        if(exists) {
+          logger.list(p);
+          // add the file to the zip
+          archive.file(p);
+        } else {
+          logger.error('missing file: ' + p);
+        }
+        return cb(null, {
+          file: p,
+          exists: exists
+        });
+      });
+    }
+
+    logger.log('adding metadata');
+
+    // map over files to add and add if they exist
+    async.mapLimit(map.getFilePathsForDeploy(), 5, iterator, function(err, res) {
+      if(err) {
+        reject(err);
+      } else {
+        var hasErrors = false;
+
+        _.each(res, function(r) {
+          if(!r.exists) {
+            hasErrors = true;
+            return;
+          }
+        });
+
+        if(hasErrors) {
+          return reject(new Error('cannot deploy - missing files'));
+        }
+
+        logger.log('starting deploy');
+        archive.finalize();
+      }
+    });
+
+  });
 }
 
 var run = module.exports.run = function(opts, cb) {
 
   var containerId;
   var oauth = opts.oauth;
-  var globs = opts.meta;
+  var globs = opts.globs;
   var map   = metaMap.createMap({
     oauth: opts.oauth
   });
@@ -373,7 +466,7 @@ var run = module.exports.run = function(opts, cb) {
 
   .then(function() {
 
-    if(!map.requiresMetadataDeploy()) {
+    if(!map.requiresMetadataDeploy() && !opts.meta) {
       return runToolingDeploy(map, oauth);
     } else {
       return runMetadataDeploy(map, oauth);
@@ -435,11 +528,12 @@ var run = module.exports.run = function(opts, cb) {
 };
 
 module.exports.cli = function(program) {
-  program.command('deploy [meta...]')
+  program.command('deploy [globs...]')
     .description('deploy metadata to target <org>')
     .option('-o, --org <org>', 'The Salesforce organization to use')
-    .action(function(meta, opts) {
-      opts.meta = meta;
+    .option('--meta', 'force deploy with metadata api')
+    .action(function(globs, opts) {
+      opts.globs = globs;
       return cliUtil.executeRun(run)(opts);
     });
 };

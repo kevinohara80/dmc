@@ -17,7 +17,7 @@ var run = module.exports.run = function(opts, cb) {
       logger.log(tokenType + ' token revoked');
     }).catch(function(err) {
       logger.log(tokenType + ' token not revoked: invalid');
-    })
+    });
   }
 
   function deleteCredential() {

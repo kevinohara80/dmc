@@ -474,53 +474,6 @@ var run = module.exports.run = function(opts, cb) {
 
   })
 
-  // // query for ids for related files/metadata
-  // .then(function() {
-  //   logger.log('loading related metadata ids');
-  //   return map.fetchIds().then(function(results) {
-  //     logger.log('loaded ' + hl(results.length) + ' ids');
-  //   });
-  // })
-  //
-  // // create stub files if necessary
-  // .then(function() {
-  //   logger.log('creating stub files');
-  //   return createStubFiles(map).then(function(stubs) {
-  //     logger.log('created ' + hl(stubs.length) + ' stub files');
-  //   });
-  // })
-  //
-  // // create static resources
-  // .then(function() {
-  //   logger.log('creating static resources');
-  //   return createStaticResources(map, oauth).then(function(srs) {
-  //     logger.log('deployed ' + hl(srs.length) + ' static resources');
-  //   });
-  // })
-  //
-  // // create and deploy the container
-  // .then(function() {
-  //   if(map.requiresMetadataDeploy()) {
-  //
-  //     logger.log('deploy type: Metadata API');
-  //
-  //   } else if(map.requiresToolingDeploy()) {
-  //     logger.log('deploy type: Tooling API');
-  //     return createContainer(oauth).then(function(id) {
-  //       containerId = id;
-  //       return createDeployArtifacts(map, containerId, oauth);
-  //     }).then(function(artifacts) {
-  //       return deployContainer(containerId, oauth);
-  //     });
-  //   }
-  // })
-  //
-  // .then(function() {
-  //   if(containerId) {
-  //     return deleteContainer(containerId, oauth);
-  //   }
-  // })
-
   .catch(function(err) {
     cb(err);
   });

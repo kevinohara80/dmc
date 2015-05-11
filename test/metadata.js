@@ -1,3 +1,5 @@
+/* jshint expr: true */
+
 var should = require('should');
 var meta   = require('../lib/metadata');
 
@@ -59,6 +61,6 @@ describe('lib/metadata', function(){
     it('should handle upper case arguments', function() {
       meta.getTypeFromFolder('TRIGGERS').should.be.an.Object;
     });
-  })
+  });
 
 });

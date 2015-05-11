@@ -36,6 +36,7 @@ loadCommand('identity');
 // loadCommand('create');
 loadCommand('deploy');
 // loadCommand('retrieve');
+// loadCommand('destroy');
 // loadCommand('anon');
 loadCommand('resources');
 // loadCommand('get');

@@ -1,7 +1,6 @@
 var gulp    = require('gulp');
 var seq     = require('run-sequence');
 var jshint  = require('gulp-jshint');
-var stylish = require('jshint-stylish');
 var spawn   = require('child_process').spawn;
 
 var files = {
@@ -18,7 +17,8 @@ var files = {
 gulp.task('lint', function() {
   return gulp.src(files.js)
   .pipe(jshint())
-  .pipe(jshint.reporter(stylish));
+  .pipe(jshint.reporter('jshint-stylish'))
+  .pipe(jshint.reporter('fail'));
 });
 
 // run mocha tests

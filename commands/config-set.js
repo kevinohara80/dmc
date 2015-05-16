@@ -30,13 +30,29 @@ var run = module.exports.run = function(opts, cb) {
       return cb(new Error('config not found'));
     }
 
-    var parsed = config.parse(opts.items);
+    // var parsed = config.parse(opts.items);
+    //
+    // _.map(parsed, function(v, k) {
+    //   logger.list(k + ': ' + cfg.get(k) + ' => ' + v);
+    // });
 
-    _.map(parsed, function(v, k) {
-      logger.list(k + ': ' + cfg.get(k) + ' => ' + v);
+    var errors = 0;
+
+    _.each(opts.items, function(item) {
+      var parts = item.split('=');
+      try {
+        cfg.set(parts[0], parts[1]);
+      } catch(err) {
+        logger.error(err.message);
+        errors++;
+      }
     });
 
-    return cfg.save(parsed);
+    if(errors > 0) {
+      throw new Error('invalid config property inputs');
+    }
+
+    return cfg.save();
   }).then(function(){
     logger.log('configuration saved');
   }).catch(function(err) {

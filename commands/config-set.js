@@ -52,6 +52,7 @@ var run = module.exports.run = function(opts, cb) {
       throw new Error('invalid config property inputs');
     }
 
+    console.log('saving configuration');
     return cfg.save();
   }).then(function(){
     logger.log('configuration saved');

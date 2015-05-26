@@ -81,4 +81,16 @@ describe('lib/config-schema', function() {
 
   });
 
+  describe('#getDefaultConfig', function() {
+
+    it('should return the default properties', function(){
+      var cfg = configSchema.getDefaultConfig();
+      cfg.should.have.property('default_org', null);
+      cfg.should.have.property('api_version', 32);
+      cfg.should.have.property('colorize', true);
+      cfg.should.have.property('log_level', 'info');
+    });
+
+  });
+
 });

@@ -30,12 +30,6 @@ var run = module.exports.run = function(opts, cb) {
       return cb(new Error('config not found'));
     }
 
-    // var parsed = config.parse(opts.items);
-    //
-    // _.map(parsed, function(v, k) {
-    //   logger.list(k + ': ' + cfg.get(k) + ' => ' + v);
-    // });
-
     var errors = 0;
 
     _.each(opts.items, function(item) {

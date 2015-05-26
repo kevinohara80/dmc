@@ -4,6 +4,7 @@ var program = require('commander');
 var logger  = require('../lib/logger');
 var version = require('../package.json').version;
 var user    = require('../lib/user');
+var config  = require('../lib/config');
 
 // set initial log level
 logger.setLogLevel(1);
@@ -43,6 +44,9 @@ loadCommand('resources');
 
 // bootstraps any necessary config items
 user.bootstrap().then(function(){
+  // preload all of the configuration files
+  return config.loadAll();
+}).then(function(){
   // starts the program
   program.parse(process.argv);
 

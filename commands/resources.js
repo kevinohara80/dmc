@@ -5,12 +5,14 @@ var sfClient = require('../lib/sf-client');
 
 var run = module.exports.run = function(opts, cb) {
 
-  sfClient.getResources({ oauth: opts.oauth }).then(function(res) {
+  sfClient.getClient().then(function(client) {
+    return client.getResources({ oauth: opts.oauth })
+  }).then(function(res) {
     logger.log('listing resources:');
     for(var key in res) {
       logger.list(key + ': ' + res[key]);
     }
-    cb();
+    cb(null);
   }).catch(cb);
 };
 

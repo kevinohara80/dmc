@@ -37,7 +37,6 @@ var run = module.exports.run = function(opts, cb) {
       try {
         cfg.set(parts[0], parts[1]);
       } catch(err) {
-        console.log('errrr');
         logger.error(err.message);
         errors++;
       }

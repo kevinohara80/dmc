@@ -8,8 +8,6 @@ var user       = require('../lib/user');
 
 var run = module.exports.run = function(opts) {
 
-  console.log(opts);
-
   var clientOpts = {};
 
   if(opts.test) {

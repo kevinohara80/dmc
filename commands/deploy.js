@@ -380,6 +380,9 @@ function runMetadataDeploy(map, oauth) {
     });
 
     // write the package.xml to the zip
+
+    console.log(map.createPackageXML(sfClient.apiVersion));
+
     archive.append(
       new Buffer(map.createPackageXML(sfClient.apiVersion)
     ), { name: 'src/package.xml' });
@@ -461,6 +464,9 @@ var run = module.exports.run = function(opts, cb) {
   .then(function() {
     logger.log('searching for local metadata');
     return getFiles({ globs: globs }).then(function(files) {
+
+      if(!files.length) throw new Error('no files for deployment found');
+
       logger.log('deploying ' + hl(files.length) + ' metadata files');
       map.addFiles(files);
     });

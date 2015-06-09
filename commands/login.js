@@ -40,7 +40,7 @@ var run = module.exports.run = function(opts) {
       // probably only works on Mac right now
       spawn('open', [authUri]);
     });
-  })
+  });
 
 };
 

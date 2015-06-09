@@ -204,8 +204,9 @@ function deployContainer(containerId, oauth) {
           return resolve(resp);
         } else if(resp.State === 'Failed') {
           logger.error('CompilerErrors');
-          var cerrs = JSON.parse(resp.CompilerErrors);
-          _.each(cerrs, function(e) {
+          //var cerrs = JSON.parse(resp.CompilerErrors);
+          console.log(resp);
+          _.each(resp.CompilerErrors, function(e) {
             logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
             logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
           });
@@ -305,7 +306,8 @@ function logDetails(res) {
   var method;
 
   if(res.details.componentSuccesses) {
-    logger.success('component successes ====>');
+
+    logger.success('component successes [' + res.details.componentSuccesses.length + '] ====>');
 
     _(res.details.componentSuccesses)
       .map(function(e) {
@@ -331,7 +333,7 @@ function logDetails(res) {
   }
 
   if(res.details.componentFailures) {
-    logger.error('component failures ====>');
+    logger.error('component failures [' + res.details.componentFailures.length + '] ====>');
 
     _(res.details.componentFailures)
       .map(function(e) {

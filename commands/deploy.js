@@ -380,9 +380,6 @@ function runMetadataDeploy(map, oauth) {
     });
 
     // write the package.xml to the zip
-
-    console.log(map.createPackageXML(sfClient.apiVersion));
-
     archive.append(
       new Buffer(map.createPackageXML(sfClient.apiVersion)
     ), { name: 'src/package.xml' });

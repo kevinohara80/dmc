@@ -488,7 +488,7 @@ var run = module.exports.run = function(opts, cb) {
 module.exports.cli = function(program) {
   program.command('deploy [globs...]')
     .description('deploy metadata to target org')
-    .option('-o, --org <org>', 'The Salesforce organization to use')
+    .option('-o, --org <org>', 'the Salesforce organization to use')
     .option('--meta', 'force deploy with metadata api')
     .action(function(globs, opts) {
       opts.globs = globs;

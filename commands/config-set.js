@@ -27,7 +27,7 @@ var run = module.exports.run = function(opts, cb) {
         logger.log('try running ' + logger.highlight('dmc init') +
           ' to initialize a local config');
       }
-      return cb(new Error('config not found'));
+      throw new Error('config not found');
     }
 
     var errors = 0;
@@ -35,6 +35,7 @@ var run = module.exports.run = function(opts, cb) {
     _.each(opts.items, function(item) {
       var parts = item.split('=');
       try {
+        logger.list(parts[0] + ' => ' + parts[1]);
         cfg.set(parts[0], parts[1]);
       } catch(err) {
         logger.error(err.message);
@@ -58,7 +59,7 @@ var run = module.exports.run = function(opts, cb) {
 
 
 module.exports.cli = function(program) {
-  program.command('config-set [items...]')
+  program.command('config:set [items...]')
     .description('set configuration variables')
     .option('-g, --global', 'Set the global config variable. Otherwise, local variable set')
     .action(function(items, opts) {

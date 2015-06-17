@@ -3,15 +3,17 @@ var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 
-var run = module.exports.run = function(org, meta, opts, cb) {
+var run = module.exports.run = function(opts, cb) {
   cb(new Error('not implemented'));
 };
 
 module.exports.cli = function(program) {
-  program.command('retrieve <org> [meta...]')
-    .description('retrieve specified [meta] from target <org>')
-    .action(function(org, meta, opts) {
-      cliUtil.checkForOrg(org);
-      run(org, meta, opts, cliUtil.callback);
+  program.command('retrieve [globs...]')
+    .description('retrieve metadata from target org')
+    .option('-o, --org <org>', 'the Salesforce organization to use')
+    .option('--meta', 'force retrieve with metadata api')
+    .action(function(globs, opts) {
+      opts.globs = globs;
+      return cliUtil.executeRun(run)(opts);
     });
 };

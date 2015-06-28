@@ -20,18 +20,7 @@ function getFilePaths(globs, oauth) {
 
 var run = module.exports.run = function(opts, cb) {
 
-  var typeMatches = _.filter(metadata.types, function(t) {
-    var matches = false;
-
-    _.each(opts.globs, function(g) {
-      if(minimatch('src/' + t.folder + '/', g)) {
-        matches = true;
-        return false;
-      }
-    });
-
-    return matches;
-  });
+  var typeMatches = metadata.getTypesFromGlobs(opts.globs);
 
   // log out the matched directories
   _.each(typeMatches, function(tm) {

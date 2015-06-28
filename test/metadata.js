@@ -67,56 +67,74 @@ describe('lib/metadata', function(){
   describe('#getTypesFromGlob', function(){
 
     it('should match classes globs with no wildcard', function(){
-      var types = meta.getTypesFromGlob('src/classes/Test.cls');
+      var types = meta.getTypesFromGlobs('src/classes/Test.cls');
       types.should.be.an.Array;
       types.length.should.equal(1);
       should(types[0].name).equal('ApexClass');
     });
 
     it('should match classes globs with wildcard', function(){
-      var types = meta.getTypesFromGlob('src/classes/*');
-      should(types).be.an.Array;
-      should(types.length).equal(1);
+      var types = meta.getTypesFromGlobs('src/classes/*');
+      types.should.be.an.Array;
+      types.length.should.equal(1);
       should(types[0].name).equal('ApexClass');
     });
 
     it('should match classes globs with wildcard on folder', function(){
-      var types = meta.getTypesFromGlob('src/class*');
-      should(types).be.an.Array;
-      should(types.length).equal(1);
+      var types = meta.getTypesFromGlobs('src/class*');
+      types.should.be.an.Array;
+      types.length.should.equal(1);
       should(types[0].name).equal('ApexClass');
     });
 
     it('should match classes on globstar for folder', function() {
-      var types = meta.getTypesFromGlob('src/**/*');
-      should(types).be.an.Array;
-      should(_.pluck(types, 'name')).containEql('ApexClass');
+      var types = meta.getTypesFromGlobs('src/**/*');
+      types.should.be.an.Array;
+      types.length.should.be.above(1);
+      _.pluck(types, 'name').should.containEql('ApexClass');
     });
 
     it('should match classes on star glob on folder', function() {
-      var types = meta.getTypesFromGlob('src/*');
-      should(types).be.an.Array;
-      should(_.pluck(types, 'name')).containEql('ApexClass');
+      var types = meta.getTypesFromGlobs('src/*');
+      types.should.be.an.Array;
+      types.length.should.be.above(1);
+      _.pluck(types, 'name').should.containEql('ApexClass');
     });
 
     it('should match on globstar all', function(){
-      var types = meta.getTypesFromGlob('**/*');
-      should(types).be.an.Array;
-      should(_.pluck(types, 'name')).containEql('ApexClass');
+      var types = meta.getTypesFromGlobs('**/*');
+      types.should.be.an.Array;
+      types.length.should.be.above(1);
+      _.pluck(types, 'name').should.containEql('ApexClass');
     });
 
     it('should match on globstar all', function(){
-      var types = meta.getTypesFromGlob('**/*');
-      should(types).be.an.Array;
-      should(_.pluck(types, 'name')).containEql('ApexClass');
+      var types = meta.getTypesFromGlobs('**/*');
+      types.should.be.an.Array;
+      types.length.should.be.above(1);
+      _.pluck(types, 'name').should.containEql('ApexClass');
     });
 
     it('should not match classes on pages glob', function(){
-      var types = meta.getTypesFromGlob('src/pages/*');
-      should(types).be.an.Array;
-      should(_.pluck(types, 'name')).not.containEql('ApexClass');
+      var types = meta.getTypesFromGlobs('src/pages/*');
+      types.should.be.an.Array;
+      types.length.should.equal(1);
+      _.pluck(types, 'name').should.not.containEql('ApexClass');
     });
 
+    it('should support glob arrays and match classes with globstar', function() {
+      var types = meta.getTypesFromGlobs(['src/**/*', 'src/pages/*']);
+      types.should.be.an.Array;
+      types.length.should.be.above(1);
+      _.pluck(types, 'name').should.containEql('ApexClass');
+    });
+
+    it('should support glob arrays and match classes with class glob', function() {
+      var types = meta.getTypesFromGlobs(['src/stat*', 'src/pages/*', 'src/cla*']);
+      types.should.be.an.Array;
+      types.length.should.be.above(1);
+      _.pluck(types, 'name').should.containEql('ApexClass');
+    });
 
   });
 

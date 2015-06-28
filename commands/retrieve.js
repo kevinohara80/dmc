@@ -1,12 +1,13 @@
-var user      = require('../lib/user');
-var _         = require('lodash');
-var logger    = require('../lib/logger');
-var cliUtil   = require('../lib/cli-util');
-var sfClient  = require('../lib/sf-client');
-var metadata  = require('../lib/metadata');
-var async     = require('async');
-var Promise   = require('bluebird');
-var minimatch = require('minimatch');
+var user        = require('../lib/user');
+var _           = require('lodash');
+var logger      = require('../lib/logger');
+var cliUtil     = require('../lib/cli-util');
+var sfClient    = require('../lib/sf-client');
+var metadata    = require('../lib/metadata');
+var metadataMap = require('../lib/metadata-map');
+var async       = require('async');
+var Promise     = require('bluebird');
+var minimatch   = require('minimatch');
 
 function getFilePaths(typeGroups, oauth) {
   return new Promise(function(resolve, reject) {

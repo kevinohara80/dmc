@@ -48,7 +48,7 @@
     "lodash": "^2.4.1",
     "minimatch": "^2.0.8",
     "nforce": "^1.0.0",
-    "nforce-metadata": "^1.0.3",
+    "nforce-metadata": "^1.0.4",
     "nforce-tooling": "0.0.4",
     "rimraf": "^2.3.2",
     "soap": "^0.6.0"

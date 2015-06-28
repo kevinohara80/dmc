@@ -8,12 +8,29 @@ var async     = require('async');
 var Promise   = require('bluebird');
 var minimatch = require('minimatch');
 
-function getFilePaths(globs, oauth) {
+function getFilePaths(typeGroups, oauth) {
   return new Promise(function(resolve, reject) {
 
+    var iterator = function(types, cb) {
+      sfClient.meta.listMetadata({
+        oauth: opts.oauth,
+        queries: _.map(types, function(t) {
+          return {
+            type: t.name
+          };
+        })
+      }).then(function(res) {
+        console.log(res);
+        cb(null, res);
+      }).catch(function(err) {
+        console.error(err.root);
+        cb(err);
+      });
+    };
 
     async.mapLimit(typeGroups, 5, iterator, function(err, res) {
       if(err) return reject(err);
+      resolve(res);
     });
   });
 }
@@ -38,21 +55,11 @@ var run = module.exports.run = function(opts, cb) {
     return result;
   }, []);
 
-  console.log(grouped);
   process.exit(1);
 
-  sfClient.meta.listMetadata({
-    oauth: opts.oauth,
-    queries: _.map(typeMatches, function(t) {
-      return {
-        type: t.name
-      };
-    })
-  }).then(function(res) {
-    console.log(res);
-    cb();
+  getFilePaths(grouped).then(function(paths) {
+    console.log(paths);
   }).catch(function(err) {
-    console.error(err.root);
     cb(err);
   });
 
@@ -62,6 +69,8 @@ module.exports.cli = function(program) {
   program.command('retrieve [globs...]')
     .description('retrieve metadata from target org')
     .option('-o, --org <org>', 'the Salesforce organization to use')
+    .option('-l, --local-only', 'only retrieve metadata that exists locally')
+    .option('-r, --replace', 'replace all local metadata with the retrieved metadata')
     .option('--meta', 'force retrieve with metadata api')
     .action(function(globs, opts) {
       opts.globs = globs;

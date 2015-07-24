@@ -47,7 +47,7 @@
     "handlebars": "^2.0.0",
     "lodash": "^3.10.0",
     "minimatch": "^2.0.8",
-    "nforce": "^1.0.0",
+    "nforce": "^1.2.0",
     "nforce-metadata": "^1.0.4",
     "nforce-tooling": "0.0.4",
     "rimraf": "^2.3.2",

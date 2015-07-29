@@ -8,10 +8,10 @@ var metaMap     = require('../lib/metadata-map');
 var async       = require('async');
 var Promise     = require('bluebird');
 var minimatch   = require('minimatch');
-var streamifier = require('streamifier');
-var unzip       = require('unzip');
 var paths       = require('../lib/paths');
 var fs          = require('../lib/fs');
+var glob        = require('glob');
+var AdmZip      = require('adm-zip');
 
 var matchOpts = { matchBase: true };
 
@@ -27,7 +27,7 @@ function getFilePaths(typeGroups, oauth) {
           };
         })
       }).then(function(res) {
-
+        console.log(res);
         if(!res || !res.length) {
           return cb(null, null);
         }
@@ -77,33 +77,73 @@ function filterOnGlobs(paths, globs) {
 }
 
 function unzipToTmp(zipBase64) {
-  console.log('unzipping to tmp dir: ' + paths.dir.tmp);
   return new Promise(function(resolve, reject) {
 
-    streamifier.createReadStream(new Buffer(zipBase64, 'base64'))
-      .pipe(unzip.Extract({ path: paths.dir.tmp }))
-      .on('close', function(){
-        logger.log('close event');
-        resolve();
-      })
-      .on('error', function(err){
-        logger.error('unable to unpack zip file');
-        reject(err)
-      });
+    logger.log('unzipping to tmp dir: ' + paths.dir.tmp);
+
+    var zip = new AdmZip(new Buffer(zipBase64, 'base64'));
+
+    logger.log('extracting zip');
+
+    zip.extractAllToAsync(paths.dir.tmp, true , function(err, res) {
+      if(err) return reject(err);
+      resolve();
+    });
 
   });
 }
 
+function copyFiles() {
+  return new Promise(function(resolve, reject) {
+
+    logger.log('merging files to src');
+
+    glob('**/*', { cwd: paths.dir.tmp + '/unpackaged' }, function(err, files) {
+      if(err) return reject(err);
+
+      Promise.map(files, function(file) {
+        if(file === 'package.xml') return Promise.resolve();
+        logger.list('mapping file: ' + file);
+        return fs.copyAsync(
+          paths.dir.tmp + '/unpackaged/' + file,
+          process.cwd() + '/src/' + file,
+          { clobber: true }
+        );
+      }, { concurrency: 5 }).then(function(){
+        resolve();
+      }).catch(function(err) {
+        reject(err);
+      });
+
+    });
+  });
+}
+
 function removeTmpDir() {
-  console.log('removing tmp');
-  return fs.removeAsync(paths.dir.tmp);
-};
-
-function removeLocalSrc() {
-
+  return new Promise(function(resolve, reject) {
+    fs.existsAsync(paths.dir.tmp).then(function(exists) {
+      if(exists) {
+        logger.log('removing tmp directory');
+        return fs.removeAsync(paths.dir.tmp);
+      }
+    });
+  });
 };
 
 var run = module.exports.run = function(opts, cb) {
+
+  return sfClient.meta.describeMetadata({oauth: opts.oauth}).then(function(md){
+    var list = _(md.metadataObjects)
+      .pluck('xmlName')
+      .sort()
+      .value();
+
+    console.log(list);
+    process.exit(0);
+  }).catch(function(err) {
+    console.error(err);
+    process.exit(0);
+  });
 
   var map;
 
@@ -147,6 +187,8 @@ var run = module.exports.run = function(opts, cb) {
 
   }).then(function(res){
     return unzipToTmp(res.zipFile);
+  }).then(function(){
+    return copyFiles();
   }).then(function() {
     logger.log('cleaning up temporary files');
     return removeTmpDir();

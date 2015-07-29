@@ -8,6 +8,8 @@ var matchOpts = { matchBase: true };
 
 describe('commands/retrieve', function(){
 
+});
+
   // // testing getting type from name
   // describe('minimatch', function() {
   //

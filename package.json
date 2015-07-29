@@ -37,6 +37,7 @@
     "should": "^4.1.0"
   },
   "dependencies": {
+    "adm-zip": "^0.4.7",
     "archiver": "^0.14.3",
     "async": "^0.9.0",
     "bluebird": "^2.9.25",
@@ -48,11 +49,9 @@
     "lodash": "^3.10.0",
     "minimatch": "^2.0.8",
     "nforce": "^1.2.0",
-    "nforce-metadata": "^1.0.4",
+    "nforce-metadata": "^1.0.5",
     "nforce-tooling": "0.0.4",
     "rimraf": "^2.3.2",
-    "soap": "^0.6.0",
-    "streamifier": "^0.1.1",
-    "unzip": "^0.1.11"
+    "soap": "^0.6.0"
   }
 }

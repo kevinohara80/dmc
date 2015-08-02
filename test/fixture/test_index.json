@@ -1,0 +1,821 @@
+{
+  "metadataObjects": [
+    {
+      "name": "InstalledPackage",
+      "folder": "installedPackages",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "installedPackage",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomLabels",
+      "folder": "labels",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "labels",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "CustomLabel"
+      ]
+    },
+    {
+      "name": "StaticResource",
+      "folder": "staticresources",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "resource",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Scontrol",
+      "folder": "scontrols",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "scf",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "AuraDefinitionBundle",
+      "folder": "aura",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "ApexComponent",
+      "folder": "components",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "component",
+      "memberType": true,
+      "deployTypes": [
+        "metadata",
+        "tooling"
+      ]
+    },
+    {
+      "name": "ApexPage",
+      "folder": "pages",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "page",
+      "memberType": true,
+      "deployTypes": [
+        "metadata",
+        "tooling"
+      ]
+    },
+    {
+      "name": "Queue",
+      "folder": "queues",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "queue",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "ExternalDataSource",
+      "folder": "dataSources",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "dataSource",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Role",
+      "folder": "roles",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "role",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Group",
+      "folder": "groups",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "group",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomObject",
+      "folder": "objects",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "object",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "CustomField",
+        "BusinessProcess",
+        "CompactLayout",
+        "RecordType",
+        "WebLink",
+        "ValidationRule",
+        "SharingReason",
+        "ListView",
+        "FieldSet"
+      ]
+    },
+    {
+      "name": "ReportType",
+      "folder": "reportTypes",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "reportType",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Report",
+      "folder": "reports",
+      "hasMetaXML": false,
+      "subFolders": true,
+      "extension": "report",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "folder": "dashboards",
+      "hasMetaXML": false,
+      "subFolders": true,
+      "extension": "dashboard",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "AnalyticSnapshot",
+      "folder": "analyticSnapshots",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "snapshot",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Layout",
+      "folder": "layouts",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "layout",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Document",
+      "folder": "documents",
+      "hasMetaXML": true,
+      "subFolders": true,
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomPageWebLink",
+      "folder": "weblinks",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "weblink",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "QuickAction",
+      "folder": "quickActions",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "quickAction",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "FlexiPage",
+      "folder": "flexipages",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "flexipage",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomTab",
+      "folder": "tabs",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "tab",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomApplicationComponent",
+      "folder": "customApplicationComponents",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "customApplicationComponent",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomApplication",
+      "folder": "applications",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "app",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Letterhead",
+      "folder": "letterhead",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "letter",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "EmailTemplate",
+      "folder": "email",
+      "hasMetaXML": true,
+      "subFolders": true,
+      "extension": "email",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Flow",
+      "folder": "flows",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "flow",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Workflow",
+      "folder": "workflows",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "workflow",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "WorkflowFieldUpdate",
+        "WorkflowKnowledgePublish",
+        "WorkflowTask",
+        "WorkflowAlert",
+        "WorkflowSend",
+        "WorkflowOutboundMessage",
+        "WorkflowRule"
+      ]
+    },
+    {
+      "name": "AssignmentRules",
+      "folder": "assignmentRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "assignmentRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "AssignmentRule"
+      ]
+    },
+    {
+      "name": "AutoResponseRules",
+      "folder": "autoResponseRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "autoResponseRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "AutoResponseRule"
+      ]
+    },
+    {
+      "name": "EscalationRules",
+      "folder": "escalationRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "escalationRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "EscalationRule"
+      ]
+    },
+    {
+      "name": "PostTemplate",
+      "folder": "postTemplates",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "postTemplate",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "ApprovalProcess",
+      "folder": "approvalProcesses",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "approvalProcess",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "HomePageComponent",
+      "folder": "homePageComponents",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "homePageComponent",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "HomePageLayout",
+      "folder": "homePageLayouts",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "homePageLayout",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomObjectTranslation",
+      "folder": "objectTranslations",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "objectTranslation",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "ApexClass",
+      "folder": "classes",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "cls",
+      "memberType": true,
+      "deployTypes": [
+        "metadata",
+        "tooling"
+      ]
+    },
+    {
+      "name": "ApexTrigger",
+      "folder": "triggers",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "trigger",
+      "memberType": true,
+      "deployTypes": [
+        "metadata",
+        "tooling"
+      ]
+    },
+    {
+      "name": "Profile",
+      "folder": "profiles",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "profile",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "PermissionSet",
+      "folder": "permissionsets",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "permissionset",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomMetadata",
+      "folder": "customMetadata",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "md",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "DataCategoryGroup",
+      "folder": "datacategorygroups",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "datacategorygroup",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "RemoteSiteSetting",
+      "folder": "remoteSiteSettings",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "remoteSite",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "AuthProvider",
+      "folder": "authproviders",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "authprovider",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomSite",
+      "folder": "sites",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "site",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "ChannelLayout",
+      "folder": "channelLayouts",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "channelLayout",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "LeadSharingRules",
+      "folder": "leadSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "LeadOwnerSharingRule",
+        "LeadCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "CampaignSharingRules",
+      "folder": "campaignSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "CampaignOwnerSharingRule",
+        "CampaignCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "CaseSharingRules",
+      "folder": "caseSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "CaseOwnerSharingRule",
+        "CaseCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "ContactSharingRules",
+      "folder": "contactSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "ContactOwnerSharingRule",
+        "ContactCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "OpportunitySharingRules",
+      "folder": "opportunitySharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "OpportunityOwnerSharingRule",
+        "OpportunityCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "AccountSharingRules",
+      "folder": "accountSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "AccountOwnerSharingRule",
+        "AccountCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "CustomObjectSharingRules",
+      "folder": "customObjectSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "CustomObjectOwnerSharingRule",
+        "CustomObjectCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "UserSharingRules",
+      "folder": "userSharingRules",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "sharingRules",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ],
+      "childNames": [
+        "UserMembershipSharingRule",
+        "UserCriteriaBasedSharingRule"
+      ]
+    },
+    {
+      "name": "Community",
+      "folder": "communities",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "community",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CallCenter",
+      "folder": "callCenters",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "callCenter",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "ConnectedApp",
+      "folder": "connectedApps",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "connectedApp",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "AppMenu",
+      "folder": "appMenus",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "appMenu",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CustomPermission",
+      "folder": "customPermissions",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "customPermission",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "SiteDotCom",
+      "folder": "siteDotComSites",
+      "hasMetaXML": true,
+      "subFolders": false,
+      "extension": "site",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "SamlSsoConfig",
+      "folder": "samlssoconfigs",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "samlssoconfig",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "CorsWhitelistOrigin",
+      "folder": "corsWhitelistOrigins",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "corsWhitelistOrigin",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Skill",
+      "folder": "skills",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "skill",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "LiveChatDeployment",
+      "folder": "liveChatDeployments",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "liveChatDeployment",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "LiveChatButton",
+      "folder": "liveChatButtons",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "liveChatButton",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "LiveChatAgentConfig",
+      "folder": "liveChatAgentConfigs",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "liveChatAgentConfig",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "SynonymDictionary",
+      "folder": "synonymDictionaries",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "synonymDictionary",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    },
+    {
+      "name": "Settings",
+      "folder": "settings",
+      "hasMetaXML": false,
+      "subFolders": false,
+      "extension": "settings",
+      "memberType": false,
+      "deployTypes": [
+        "tooling"
+      ]
+    }
+  ],
+  "organizationNamespace": "",
+  "partialSaveAllowed": false,
+  "testRequired": true
+}

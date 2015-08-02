@@ -31,6 +31,7 @@ loadCommand('config-set');
 loadCommand('logins');
 loadCommand('login');
 loadCommand('logout');
+loadCommand('index');
 loadCommand('open');
 loadCommand('identity');
 // loadCommand('index');

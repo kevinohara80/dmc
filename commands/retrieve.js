@@ -1,17 +1,17 @@
-var user        = require('../lib/user');
-var _           = require('lodash');
-var logger      = require('../lib/logger');
-var cliUtil     = require('../lib/cli-util');
-var sfClient    = require('../lib/sf-client');
-var metadata    = require('../lib/metadata');
-var metaMap     = require('../lib/metadata-map');
-var async       = require('async');
-var Promise     = require('bluebird');
-var minimatch   = require('minimatch');
-var paths       = require('../lib/paths');
-var fs          = require('../lib/fs');
-var glob        = require('glob');
-var AdmZip      = require('adm-zip');
+var user      = require('../lib/user');
+var _         = require('lodash');
+var logger    = require('../lib/logger');
+var cliUtil   = require('../lib/cli-util');
+var sfClient  = require('../lib/sf-client');
+var metadata  = require('../lib/metadata');
+var metaMap   = require('../lib/metadata-map');
+var async     = require('async');
+var Promise   = require('bluebird');
+var minimatch = require('minimatch');
+var paths     = require('../lib/paths');
+var fs        = require('../lib/fs');
+var glob      = require('glob');
+var AdmZip    = require('adm-zip');
 
 var matchOpts = { matchBase: true };
 
@@ -35,7 +35,7 @@ function getFilePaths(typeGroups, oauth) {
         var filePaths = _(res)
           .flattenDeep()
           .map(function(md) {
-            return 'src/' + md.fileName
+            return 'src/' + md.fileName;
           })
           .value();
 
@@ -128,22 +128,9 @@ function removeTmpDir() {
       }
     });
   });
-};
+}
 
 var run = module.exports.run = function(opts, cb) {
-
-  return sfClient.meta.describeMetadata({oauth: opts.oauth}).then(function(md){
-    var list = _(md.metadataObjects)
-      .pluck('xmlName')
-      .sort()
-      .value();
-
-    console.log(list);
-    process.exit(0);
-  }).catch(function(err) {
-    console.error(err);
-    process.exit(0);
-  });
 
   var map;
 
@@ -207,6 +194,7 @@ module.exports.cli = function(program) {
     .option('--meta', 'force retrieve with metadata api')
     .action(function(globs, opts) {
       opts.globs = globs;
+      opts._loadOrg = true;
       return cliUtil.executeRun(run)(opts);
     });
 };

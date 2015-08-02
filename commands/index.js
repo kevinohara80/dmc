@@ -1,108 +1,35 @@
+var _        = require('lodash');
 var user     = require('../lib/user');
 var index    = require('../lib/index');
 var logger   = require('../lib/logger');
+var paths    = require('../lib/paths');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
-var _        = require('lodash');
-var async    = require('async');
+var fs       = require('../lib/fs');
 
-function runIndex(idx, type, oauth, cb) {
-  if(!type.queryable) {
-    return process.nextTick(cb);
-  }
+var run = module.exports.run = function(opts, cb) {
+  logger.log('indexing org: ' + opts.org);
 
-  var q = 'SELECT Id';
+  var idx = index.init(opts.org, opts.oauth);
 
-  var nameField = _.find(type.fields, { nameField: true });
-  if(nameField) {
-    q += ', ' + nameField.name;
-  }
-
-  q += ' FROM ' + type.name;
-
-  sfClient.tooling.query({ q: q, oauth: oauth }, function(err, resp) {
-    if(err) {
-      logger.error('indexing failed: ' + type.name);
-      logger.error(err.message);
-      return cb(err);
-    }
-    _.each(resp.records, function(r) {
-      if(r.attributes) delete r.attributes;
-    });
-    idx.setAllForType(type.name, resp.records);
-    return cb();
-  });
-}
-
-function getObjects(oauth, cb) {
-  logger.log('fetching available metadata types');
-  sfClient.tooling.getObjects({ oauth: oauth }, function(err, objs) {
-    if(err) return cb(err);
-    _.each(objs.sobjects, function(o) {
-      _.each(o.urls, function(u) {
-        //logger.log(u);
-      });
-    });
-    return cb(null, _.pluck(objs.sobjects, 'name'));
-  });
-  //return cb(null, ['ApexClass', 'ApexPage', 'ApexComponent', 'ApexTrigger', 'CustomObject']);
-}
-
-function getDescribe(desc, o, oauth, cb) {
-  //logger.log('describing: ' + o);
-
-  sfClient.tooling.getDescribe({ oauth: oauth, type: o }, function(err, d) {
-    if(err) return cb(err);
-    desc[o] = d;
-    return cb();
-  });
-}
-
-var run = module.exports.run = function(org, opts, cb) {
-
-  var idx;
-  var oauth = user.getCredential(org);
-  var objs = [];
-  var desc = {};
-
-  async.series([
-    function(cb2) {
-      index.getIndex(org, function(err, i) {
-        if(err) return cb2(err);
-        idx = i;
-        cb2();
-      });
-    },
-    function(cb2) {
-      getObjects(oauth, function(err, resp) {
-        if(err) return cb2(err);
-        objs = resp;
-        cb2();
-      });
-    },
-    function(cb2) {
-      async.each(objs, function(o, cb3) {
-        getDescribe(desc, o, oauth, cb3);
-      }, cb2);
-    },
-    function(cb2) {
-      async.each(objs, function(o, cb3) {
-        runIndex(idx, desc[o], oauth, cb3);
-      }, cb2);
-    }
-  ], function(err) {
-    if(err) return cb(err);
-    logger.log('index complete');
-    logger.log('saving index manifest');
-    idx.save(cb);
+  logger.log('fetching index data');
+  idx.fetch().then(function() {
+    logger.log('saving index');
+    return idx.save();
+  }).then(function() {
+    cb();
+  }).catch(function(err) {
+    cb(err);
   });
 };
 
 module.exports.cli = function(program) {
-  program.command('index <org>')
-    .description('indexes metadata for a target <org>')
+  program.command('index [org]')
+    .description('indexes metadata for a target org')
+    .option('-a, --all', 'index all current orgs')
     .action(function(org, opts) {
-      cliUtil.checkForOrg(org);
-      run(org, opts, cliUtil.callback);
+      opts.org = org;
+      opts._loadOrg = true;
+      return cliUtil.executeRun(run)(opts);
     });
 };

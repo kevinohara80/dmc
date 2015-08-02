@@ -32,9 +32,9 @@ var run = module.exports.run = function(opts, cb) {
 module.exports.cli = function(program) {
   program.command('open [org]')
     .description('open the target org in a browser window')
-    .option('-o, --org <org>', 'The Salesforce organization to use')
     .action(function(org, opts) {
-      opts.org = org || opts.org;
+      opts.org = org;
+      opts._loadOrg = true;
       return cliUtil.executeRun(run)(opts);
     });
 };

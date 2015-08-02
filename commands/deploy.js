@@ -1,6 +1,5 @@
 var fs       = require('fs-extra');
 var user     = require('../lib/user');
-var index    = require('../lib/index');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 var meta     = require('../lib/metadata');
@@ -492,6 +491,7 @@ module.exports.cli = function(program) {
     .option('--meta', 'force deploy with metadata api')
     .action(function(globs, opts) {
       opts.globs = globs;
+      opts._loadOrg = true;
       return cliUtil.executeRun(run)(opts);
     });
 };

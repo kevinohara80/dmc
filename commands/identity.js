@@ -29,12 +29,12 @@ var run = module.exports.run = function(opts, cb) {
 };
 
 module.exports.cli = function(program) {
-  program.command('identity [org]')
+  program.command('identity')
     .description('show the identity for the specified org')
     .option('-o, --org <org>', 'The Salesforce organization to use')
     .option('-f, --fields <fields>', 'Comma-separated fields to show. Use dot notation')
-    .action(function(org, opts) {
-      opts.org = org || opts.org;
+    .action(function(opts) {
+      opts._loadOrg = true;
       return cliUtil.executeRun(run)(opts);
     });
 };

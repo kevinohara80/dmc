@@ -1,6 +1,7 @@
 var logger     = require('../lib/logger');
 var sfclient   = require('../lib/sf-client');
 var authServer = require('../lib/auth-server');
+var index      = require('../commands/index');
 var sfClient   = require('../lib/sf-client');
 var cliUtil    = require('../lib/cli-util');
 var spawn      = require('child_process').spawn;
@@ -29,8 +30,17 @@ var run = module.exports.run = function(opts) {
       logger.log('saving credentials for ' + opts.org);
       creds.nick = opts.org;
       creds.org = opts.org;
-      user.saveCredential(opts.org, creds);
-      logger.done();
+      user.saveCredential(opts.org, creds).then(function(){
+        return index.run({ org: opts.org, oauth: creds}, function(err, res) {
+          if(err) {
+            logger.error('unable to save index');
+            logger.done(false);
+          } else {
+            logger.done();
+          }
+        });
+      });
+      //logger.done();
     });
 
     authServer.listen(3835, function(){

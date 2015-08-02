@@ -1,10 +1,10 @@
-var Promise    = require('bluebird');
-var logger     = require('../lib/logger');
-var user       = require('../lib/user');
-var sfClient   = require('../lib/sf-client');
-var cliUtil    = require('../lib/cli-util');
-var config     = require('../lib/config');
-var async      = require('async');
+var Promise  = require('bluebird');
+var logger   = require('../lib/logger');
+var user     = require('../lib/user');
+var sfClient = require('../lib/sf-client');
+var cliUtil  = require('../lib/cli-util');
+var config   = require('../lib/config');
+var async    = require('async');
 
 var run = module.exports.run = function(opts, cb) {
 
@@ -34,6 +34,10 @@ var run = module.exports.run = function(opts, cb) {
     }
   }
 
+  function deleteIndex() {
+
+  }
+
   return Promise.resolve().then(function() {
     return Promise.all([
       revokeToken('access'),
@@ -55,9 +59,9 @@ var run = module.exports.run = function(opts, cb) {
 var cli = module.exports.cli = function(program) {
   program.command('logout [org]')
     .description('logout of a Salesforce organization')
-    .option('-o, --org <org>', 'The Salesforce organization to use')
     .action(function(org, opts) {
-      opts.org = org || opts.org;
+      opts.org = org;
+      opts._loadOrg = true;
       return cliUtil.executeRun(run)(opts);
     });
 };

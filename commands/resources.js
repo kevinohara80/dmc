@@ -21,6 +21,7 @@ module.exports.cli = function(program) {
     .description('list all of the available api resources')
     .option('-o, --org <org>', 'The Salesforce organization to use')
     .action(function(opts) {
+      opts._loadOrg = true;
       return cliUtil.executeRun(run)(opts);
     });
 };

@@ -51,7 +51,6 @@ function getFilePaths(typeGroups, oauth) {
         .flattenDeep()
         .uniq()
         .value();
-      process.exit(0);
       resolve(files);
     });
   });
@@ -151,8 +150,6 @@ var run = module.exports.run = function(opts, cb) {
   }).then(function(fpaths){
     return filterOnGlobs(fpaths, opts.globs);
   }).then(function(filteredPaths) {
-
-    console.log('filteredPaths', filteredPaths);
     map.addFiles(filteredPaths);
 
     var apiVersion = sfClient.apiVersion.replace('v', '');

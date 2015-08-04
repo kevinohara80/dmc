@@ -2,7 +2,7 @@ var fs       = require('fs-extra');
 var user     = require('../lib/user');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
-var meta     = require('../lib/metadata');
+var index    = require('../lib/index');
 var metaMap  = require('../lib/metadata-map');
 var getFiles = require('../lib/get-files');
 var Promise  = require('bluebird');
@@ -14,7 +14,7 @@ var logger   = require('../lib/logger');
 var hl       = logger.highlight;
 
 function createStubFiles(map) {
-  var keys = meta.getMemberTypeNames();
+  var keys = map.index.getMemberTypeNames();
 
   function iterator(obj, cb) {
     obj.oauth = map.oauth;
@@ -32,7 +32,7 @@ function createStubFiles(map) {
 
     _.each(keys, function(k) {
       _(map.meta[k])
-        .where(function(o) {
+        .filter(function(o) {
           return (!o.id || o.id === null || o.id === '');
         })
         .each(function(o) {
@@ -114,7 +114,7 @@ function createContainer(oauth) {
 function createDeployArtifacts(map, containerId, oauth) {
 
   var iterator = function(m, cb2) {
-    if(meta.getMemberTypeNames().indexOf(m.type) === -1) {
+    if(map.index.getMemberTypeNames().indexOf(m.type) === -1) {
       return cb2(null);
     }
 
@@ -203,8 +203,6 @@ function deployContainer(containerId, oauth) {
           return resolve(resp);
         } else if(resp.State === 'Failed') {
           logger.error('CompilerErrors');
-          //var cerrs = JSON.parse(resp.CompilerErrors);
-          console.log(resp);
           _.each(resp.CompilerErrors, function(e) {
             logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
             logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
@@ -450,11 +448,18 @@ var run = module.exports.run = function(opts, cb) {
   var containerId;
   var oauth = opts.oauth;
   var globs = opts.globs;
-  var map   = metaMap.createMap({
-    oauth: opts.oauth
+
+  var map = metaMap.createMap({
+    oauth: opts.oauth,
+    org:   opts.org
   });
 
   return Promise.resolve()
+
+  // load the index for the org
+  .then(function() {
+    return map.autoLoad();
+  })
 
   // search src/ for file matches
   .then(function() {

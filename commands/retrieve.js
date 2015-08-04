@@ -3,7 +3,7 @@ var _         = require('lodash');
 var logger    = require('../lib/logger');
 var cliUtil   = require('../lib/cli-util');
 var sfClient  = require('../lib/sf-client');
-var metadata  = require('../lib/metadata');
+var index     = require('../lib/index');
 var metaMap   = require('../lib/metadata-map');
 var async     = require('async');
 var Promise   = require('bluebird');
@@ -27,7 +27,6 @@ function getFilePaths(typeGroups, oauth) {
           };
         })
       }).then(function(res) {
-        console.log(res);
         if(!res || !res.length) {
           return cb(null, null);
         }
@@ -41,7 +40,6 @@ function getFilePaths(typeGroups, oauth) {
 
         cb(null, filePaths);
       }).catch(function(err) {
-        console.error(err.root);
         cb(err);
       });
     };
@@ -53,7 +51,7 @@ function getFilePaths(typeGroups, oauth) {
         .flattenDeep()
         .uniq()
         .value();
-
+      process.exit(0);
       resolve(files);
     });
   });
@@ -132,27 +130,29 @@ function removeTmpDir() {
 
 var run = module.exports.run = function(opts, cb) {
 
-  var map;
-
-  var typeMatches = metadata.getTypesFromGlobs(opts.globs);
-
-  // log out the matched directories
-  _.each(typeMatches, function(tm) {
-    logger.list(tm.folder);
+  var map = metaMap.createMap({
+    oauth: opts.oauth,
+    org: opts.org
   });
 
-  // group the metadata into groups of 3 since that's the limit
-  // in a single listMetadata call
-  var grouped = _.chunk(typeMatches, 3);
+  map.autoLoad().then(function() {
+    var typeMatches = map.index.getTypesFromGlobs(opts.globs);
 
-  getFilePaths(grouped, opts.oauth).then(function(paths) {
-    return filterOnGlobs(paths, opts.globs);
-  }).then(function(filteredPaths) {
-
-    map = metaMap.createMap({
-      oauth: opts.oauth
+    // log out the matched directories
+    _.each(typeMatches, function(tm) {
+      logger.list(tm.folder);
     });
 
+    // group the metadata into groups of 3 since that's the limit
+    // in a single listMetadata call
+    var grouped = _.chunk(typeMatches, 3);
+
+    return getFilePaths(grouped, opts.oauth);
+  }).then(function(fpaths){
+    return filterOnGlobs(fpaths, opts.globs);
+  }).then(function(filteredPaths) {
+
+    console.log('filteredPaths', filteredPaths);
     map.addFiles(filteredPaths);
 
     var apiVersion = sfClient.apiVersion.replace('v', '');

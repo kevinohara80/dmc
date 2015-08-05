@@ -1,7 +1,11 @@
 dmc
 ===
 
-Cross-platform, developer cli tool for Salesforce
+`dmc` is a cross-platform, developer tool for Salesforce.com.
+
+**BETTER DOCS COMING SOON**
+
+NOTE: `dmc` is currently in beta. Use at your own risk.
 
 ## Installation
 
@@ -9,9 +13,8 @@ Cross-platform, developer cli tool for Salesforce
 
 ## Usage
 
-```bash
+```
   Usage: dmc [options] [command]
-
 
   Commands:
 

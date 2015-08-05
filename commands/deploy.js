@@ -480,7 +480,6 @@ var run = module.exports.run = function(opts, cb) {
     } else {
       return runMetadataDeploy(map, oauth);
     }
-
   })
 
   .catch(function(err) {

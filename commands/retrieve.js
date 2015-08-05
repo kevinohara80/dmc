@@ -12,6 +12,7 @@ var paths     = require('../lib/paths');
 var fs        = require('../lib/fs');
 var glob      = require('glob');
 var AdmZip    = require('adm-zip');
+var rimraf    = require('rimraf');
 
 var matchOpts = { matchBase: true };
 
@@ -31,9 +32,22 @@ function getFilePaths(typeGroups, oauth) {
           return cb(null, null);
         }
 
+        // create a regex to test for incompatible fileNames
+        // returned from salesforce. See comments below...
+        var re = new RegExp('^(' + _.pluck(types, 'name').join('|') + ')\\/');
+
         var filePaths = _(res)
           .flattenDeep()
           .map(function(md) {
+            // sometimes salesforce responds with a weird
+            // filename like Workflow/My_Object.object when
+            // all other workflows fall into a directory like
+            // workflows/. This checks for those edge cases and
+            // adjusts the folder
+            if(re.test(md.fileName)) {
+              var folder = _.find(types, { name: md.type}).folder;
+              return 'src/' + md.fileName.replace(re, folder + '/');
+            }
             return 'src/' + md.fileName;
           })
           .value();
@@ -73,6 +87,15 @@ function filterOnGlobs(paths, globs) {
     .value();
 }
 
+function clearSrcDir() {
+  return new Promise(function(resolve, reject) {
+    rimraf('src/*', function(err) {
+      if(err) return reject(err);
+      return resolve()
+    });
+  });
+};
+
 function unzipToTmp(zipBase64) {
   return new Promise(function(resolve, reject) {
 
@@ -93,22 +116,21 @@ function unzipToTmp(zipBase64) {
 function copyFiles() {
   return new Promise(function(resolve, reject) {
 
-    logger.log('merging files to src');
-
     glob('**/*', { cwd: paths.dir.tmp + '/unpackaged' }, function(err, files) {
       if(err) return reject(err);
 
       Promise.map(files, function(file) {
         if(file === 'package.xml') return Promise.resolve();
-        logger.list('mapping file: ' + file);
+        logger.list('merging file: ' + file);
         return fs.copyAsync(
           paths.dir.tmp + '/unpackaged/' + file,
           process.cwd() + '/src/' + file,
           { clobber: true }
         );
-      }, { concurrency: 5 }).then(function(){
+      }, { concurrency: 3 }).then(function(){
         resolve();
       }).catch(function(err) {
+        logger.error('copy file error: ' + err.message);
         reject(err);
       });
 
@@ -134,22 +156,30 @@ var run = module.exports.run = function(opts, cb) {
     org: opts.org
   });
 
-  map.autoLoad().then(function() {
+  return Promise.resolve()
+
+  .then(function(){
+    return map.autoLoad();
+  })
+
+  .then(function() {
     var typeMatches = map.index.getTypesFromGlobs(opts.globs);
-
     // log out the matched directories
+    logger.log('matching types')
     _.each(typeMatches, function(tm) {
-      logger.list(tm.folder);
+      logger.list('matched type: ' + tm.name);
     });
-
     // group the metadata into groups of 3 since that's the limit
     // in a single listMetadata call
     var grouped = _.chunk(typeMatches, 3);
-
     return getFilePaths(grouped, opts.oauth);
-  }).then(function(fpaths){
+  })
+
+  .then(function(fpaths){
     return filterOnGlobs(fpaths, opts.globs);
-  }).then(function(filteredPaths) {
+  })
+
+  .then(function(filteredPaths) {
     map.addFiles(filteredPaths);
 
     var apiVersion = sfClient.apiVersion.replace('v', '');
@@ -168,15 +198,31 @@ var run = module.exports.run = function(opts, cb) {
     });
 
     return promise;
+  })
 
-  }).then(function(res){
+  .then(function(res){
     return unzipToTmp(res.zipFile);
-  }).then(function(){
+  })
+
+  .then(function(){
+    if(opts.replace) {
+      logger.log('clearing src dir');
+      return clearSrcDir();
+    }
+  })
+
+  .then(function(){
+    logger.log('merging files to src');
     return copyFiles();
-  }).then(function() {
+  })
+
+  .then(function() {
     logger.log('cleaning up temporary files');
     return removeTmpDir();
-  }).catch(function(err) {
+  })
+
+  .catch(function(err) {
+    console.log('got an error');
     cb(err);
   });
 
@@ -186,9 +232,7 @@ module.exports.cli = function(program) {
   program.command('retrieve [globs...]')
     .description('retrieve metadata from target org')
     .option('-o, --org <org>', 'the Salesforce organization to use')
-    .option('-l, --local-only', 'only retrieve metadata that exists locally')
     .option('-r, --replace', 'replace all local metadata with the retrieved metadata')
-    .option('--meta', 'force retrieve with metadata api')
     .action(function(globs, opts) {
       opts.globs = globs;
       opts._loadOrg = true;

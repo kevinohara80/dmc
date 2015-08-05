@@ -91,10 +91,10 @@ function clearSrcDir() {
   return new Promise(function(resolve, reject) {
     rimraf('src/*', function(err) {
       if(err) return reject(err);
-      return resolve()
+      return resolve();
     });
   });
-};
+}
 
 function unzipToTmp(zipBase64) {
   return new Promise(function(resolve, reject) {
@@ -165,7 +165,7 @@ var run = module.exports.run = function(opts, cb) {
   .then(function() {
     var typeMatches = map.index.getTypesFromGlobs(opts.globs);
     // log out the matched directories
-    logger.log('matching types')
+    logger.log('matching types');
     _.each(typeMatches, function(tm) {
       logger.list('matched type: ' + tm.name);
     });

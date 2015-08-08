@@ -15,7 +15,57 @@ gulp, or even into more complex systems like CI.
 
 ## Installation
 
-`$ npm install -g dmc`
+`npm install -g dmc`
+
+## Getting Started
+
+Entering `dmc` on the command line with no command argument will print
+usage information.
+
+```
+$ dmc
+
+  Usage: dmc [options] [command]
+
+
+  Commands:
+
+    init                             initialize a project for dmc
+    config [options]                 show the resolved dmc configuration
+    config:set [options] [items...]  set configuration variables
+    logins                           list your salesforce logins
+    login [options] <org>            login to a Salesforce organization
+    logout [org]                     logout of a Salesforce organization
+    index [options] [org]            indexes metadata for a target org
+    open [org]                       open the target org in a browser window
+    identity [options]               show the identity for the specified org
+    deploy [options] [globs...]      deploy metadata to target org
+    retrieve [options] [globs...]    retrieve metadata from target org
+    resources [options]              list all of the available api resources
+
+  Options:
+
+    -h, --help     output usage information
+    -V, --version  output the version number
+    --verbose      use verbose logging
+    --silent       skip logging
+```
+
+To view the usage info on any particular command, enter the dmc 
+command and add the `--help` or `-h` flag. Example:
+
+```
+$ dmc config:set --help
+
+  Usage: config:set [options] [items...]
+
+  set configuration variables
+
+  Options:
+
+    -h, --help    output usage information
+    -g, --global  Set the global config variable. Otherwise, local variable set
+```
 
 ## Authentication
 

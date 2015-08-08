@@ -71,7 +71,7 @@ $ dmc config:set --help
 
 `dmc` uses a global authentication system. This means that org credentials
 aren't stored on a project-by-project basis. Rather, `dmc` stores centrally
-stores credentials that can be used whereever and whenever you need to. This
+stores credentials that can be used wherever and whenever you need to. This
 also comes in handy when you're working in a project but need to deploy it 
 to multiple targets.
 

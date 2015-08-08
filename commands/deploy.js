@@ -45,6 +45,7 @@ function createStubFiles(map) {
 
     async.mapLimit(stubs, 5, iterator, function(err, results) {
       if(err) {
+        logger.error(err.message);
         return reject(new Error('unable to create stub files'));
       } else {
         return resolve(results);
@@ -426,6 +427,7 @@ function runMetadataDeploy(map, oauth) {
 
         _.each(res, function(r) {
           if(!r.exists) {
+            logger.error('missing file: ' + r.file);
             hasErrors = true;
             return;
           }

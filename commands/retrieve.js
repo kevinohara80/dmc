@@ -121,17 +121,19 @@ function copyFiles() {
 
       Promise.map(files, function(file) {
         if(file === 'package.xml') return Promise.resolve();
-        logger.list('merging file: ' + file);
+        logger.list('copying file: ' + file);
         return fs.copyAsync(
           paths.dir.tmp + '/unpackaged/' + file,
           process.cwd() + '/src/' + file,
-          { clobber: true }
+          { clobber: false }
         );
-      }, { concurrency: 3 }).then(function(){
+      }, { concurrency: 5 }).then(function(){
         resolve();
       }).catch(function(err) {
-        logger.error('copy file error: ' + err.message);
-        reject(err);
+        _.each(err, function(e) {
+          logger.error(e.message);
+        });
+        reject(new Error('file copy errors'));
       });
 
     });
@@ -222,7 +224,6 @@ var run = module.exports.run = function(opts, cb) {
   })
 
   .catch(function(err) {
-    console.log('got an error');
     cb(err);
   });
 

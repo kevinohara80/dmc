@@ -204,8 +204,8 @@ describe('lib/index.js', function() {
       idx.getTypeFromFolder('triggers').should.be.an.Object;
     });
 
-    it('should handle upper case arguments', function() {
-      idx.getTypeFromFolder('TRIGGERS').should.be.an.Object;
+    it('should fail on wrong case', function() {
+      should(idx.getTypeFromFolder('TRIGGERS')).be.undefined;
     });
 
   });

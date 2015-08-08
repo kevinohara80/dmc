@@ -1,11 +1,13 @@
 dmc
 ===
 
+[![Build Status](https://travis-ci.org/kevinohara80/dmc.svg)](https://travis-ci.org/kevinohara80/dmc)
+
 *NOTE: `dmc` is currently in beta. Use at your own risk.*
 
 `dmc` is a cross-platform, CLI developer tool for Salesforce.com. `dmc` aims
-to provide a CLI interface to salesforce.com development that abstracts the 
-complexities of dealing with API's and metadata into a simple tool that 
+to provide a CLI interface to salesforce.com development that abstracts the
+complexities of dealing with API's and metadata into a simple tool that
 makes everything feel like local and remote file system operations.
 
 `dmc` was built to be used on the command line but it's modules are exposed
@@ -51,7 +53,7 @@ $ dmc
     --silent       skip logging
 ```
 
-To view the usage info on any particular command, enter the dmc 
+To view the usage info on any particular command, enter the dmc
 command and add the `--help` or `-h` flag. Example:
 
 ```
@@ -74,13 +76,13 @@ $ dmc config:set --help
 `dmc` uses a global authentication system. This means that org credentials
 aren't stored on a project-by-project basis. Rather, `dmc` stores centrally
 stores credentials that can be used wherever and whenever you need to. This
-also comes in handy when you're working in a project but need to deploy it 
+also comes in handy when you're working in a project but need to deploy it
 to multiple targets.
 
 ### Configuration
 
-`dmc` has a configuration system that allow a developer to set global 
-configuration options as well as override those at a project level. 
+`dmc` has a configuration system that allow a developer to set global
+configuration options as well as override those at a project level.
 Setting up project-level confiuration is completely optional.
 
 ## Contributing
@@ -103,7 +105,6 @@ spend a bunch of your free time on building it.
   * Ensure your commit is rebased from the target branch.
   * Reference any issue numbers that the PR resolves
 * **Tests**: Whenever possible, include unit tests with your PR.
-* **Clean Builds**: There is a very simple gulp build included with this project 
-that runs jshint and unit tests. You are encouraged to run this before submitting 
+* **Clean Builds**: There is a very simple gulp build included with this project
+that runs jshint and unit tests. You are encouraged to run this before submitting
 your PR to make sure that all tests pass and that jshint rules are enforced.
-

@@ -67,7 +67,9 @@ $ dmc config:set --help
     -g, --global  Set the global config variable. Otherwise, local variable set
 ```
 
-## Authentication
+## Core Concepts
+
+### Authentication
 
 `dmc` uses a global authentication system. This means that org credentials
 aren't stored on a project-by-project basis. Rather, `dmc` stores centrally
@@ -75,8 +77,33 @@ stores credentials that can be used wherever and whenever you need to. This
 also comes in handy when you're working in a project but need to deploy it 
 to multiple targets.
 
-## Configuration
+### Configuration
 
 `dmc` has a configuration system that allow a developer to set global 
 configuration options as well as override those at a project level. 
 Setting up project-level confiuration is completely optional.
+
+## Contributing
+
+**CURRENTLY SEEKING WINDOWS TESTERS/CONTRIBUTORS**
+
+You're welcome and encouraged to contribute to `dmc`. Please just keep in
+mind the following guidelines before submitting a PR.
+
+* **API Additions**: Undoubtedly, the API will be expanding over time adding
+new commands and functionality. This needs to be done carefully though. It's
+easy for a tool like this to become a grab bag of commands. It's highly advised
+that if you want to contribute and API addition/change, that you first submit
+a proposal in the form of an issue to this repo. That way, we as a community
+can determine whether or not it should be a part of the project before you
+spend a bunch of your free time on building it.
+* **PR Format**: When submitting a PR, please make sure of the following:
+  * Include only a single commit. You can squash multiple commits with a rebase prior
+  to submitting the PR.
+  * Ensure your commit is rebased from the target branch.
+  * Reference any issue numbers that the PR resolves
+* **Tests**: Whenever possible, include unit tests with your PR.
+* **Clean Builds**: There is a very simple gulp build included with this project 
+that runs jshint and unit tests. You are encouraged to run this before submitting 
+your PR to make sure that all tests pass and that jshint rules are enforced.
+

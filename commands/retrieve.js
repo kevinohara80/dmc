@@ -127,7 +127,7 @@ function copyFiles() {
           process.cwd() + '/src/' + file,
           { clobber: false }
         );
-      }, { concurrency: 5 }).then(function(){
+      }, { /* concurrency: 5 */ }).then(function(){
         resolve();
       }).catch(function(err) {
         _.each(err, function(e) {

@@ -125,7 +125,7 @@ function copyFiles() {
         return fs.copyAsync(
           paths.dir.tmp + '/unpackaged/' + file,
           process.cwd() + '/src/' + file,
-          { clobber: false }
+          { clobber: true }
         );
       }, { /* concurrency: 5 */ }).then(function(){
         resolve();

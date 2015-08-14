@@ -204,6 +204,7 @@ function deployContainer(containerId, oauth) {
           return resolve(resp);
         } else if(resp.State === 'Failed') {
           logger.error('CompilerErrors');
+          console.log(resp);
           _.each(resp.CompilerErrors, function(e) {
             logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
             logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
@@ -357,11 +358,15 @@ function logDetails(res) {
       .value();
   }
 
-  if(res.details.numTestsRun && res.details.numTestsRun > 0) {
+  if(res.details.runTestResult) {
     logger.log('test results ====>');
-    logger.list('tests run: ' + e.numTestsRun);
-    logger.list('failures: ' + e.numFailures);
-    logger.list('total time: ' + e.totalTime);
+    logger.list('tests run: ' + res.details.runTestResult.numTestRun);
+    logger.list('failures: ' + res.details.runTestResult.numFailures);
+    logger.list('total time: ' + res.details.runTestResult.totalTime);
+
+    _.each(res.details.runTestResult.failures, function (f) {
+      console.log(f);
+    })
   }
 }
 
@@ -374,7 +379,10 @@ function runMetadataDeploy(map, oauth) {
     var promise = sfClient.meta.deployAndPoll({
       zipFile: archive,
       oauth: oauth,
-      includeDetails: true
+      includeDetails: true,
+      deployOptions: {
+        rollbackOnError: true
+      }
     });
 
     // write the package.xml to the zip
@@ -383,13 +391,21 @@ function runMetadataDeploy(map, oauth) {
     ), { name: 'src/package.xml' });
 
     promise.poller.on('poll', function(res) {
-      logger.log('deploy status: ' + hl(res.status));
+
+      var logs = [];
+
+      logs.push('deploy status: ' + hl(res.status));
+      if(res.stateDetail) logs.push('state: ' + res.stateDetail);
+      logs.push('components: deployed ' + res.numberComponentsDeployed + '/' +res.numberComponentsTotal);
+
+      logger.log(logs);
     });
 
     promise.then(function(results){
       logDetails(results);
       resolve();
     }).catch(function(err) {
+      console.error(err);
       if(err.details) {
         logDetails(err);
       } else {

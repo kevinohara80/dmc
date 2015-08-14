@@ -16,11 +16,11 @@ var rimraf    = require('rimraf');
 
 var matchOpts = { matchBase: true };
 
-function getFilePaths(typeGroups, oauth) {
+function getFilePaths(typeGroups, oauth, client) {
   return new Promise(function(resolve, reject) {
 
     var iterator = function(types, cb) {
-      sfClient.meta.listMetadata({
+      client.meta.listMetadata({
         oauth: oauth,
         queries: _.map(types, function(t) {
           return {
@@ -153,6 +153,8 @@ function removeTmpDir() {
 
 var run = module.exports.run = function(opts, cb) {
 
+  var client;
+
   var map = metaMap.createMap({
     oauth: opts.oauth,
     org: opts.org
@@ -160,7 +162,12 @@ var run = module.exports.run = function(opts, cb) {
 
   return Promise.resolve()
 
-  .then(function(){
+  .then(function() {
+    return sfClient.getClient(opts.oauth);
+  })
+
+  .then(function(sfdcClient){
+    client = sfdcClient;
     return map.autoLoad();
   })
 
@@ -174,7 +181,7 @@ var run = module.exports.run = function(opts, cb) {
     // group the metadata into groups of 3 since that's the limit
     // in a single listMetadata call
     var grouped = _.chunk(typeMatches, 3);
-    return getFilePaths(grouped, opts.oauth);
+    return getFilePaths(grouped, opts.oauth, client);
   })
 
   .then(function(fpaths){
@@ -184,9 +191,9 @@ var run = module.exports.run = function(opts, cb) {
   .then(function(filteredPaths) {
     map.addFiles(filteredPaths);
 
-    var apiVersion = sfClient.apiVersion.replace('v', '');
+    var apiVersion = client.apiVersion.replace('v', '');
 
-    var promise = sfClient.meta.retrieveAndPoll({
+    var promise = client.meta.retrieveAndPoll({
       oauth: opts.oauth,
       apiVersion: apiVersion,
       unpackaged: {

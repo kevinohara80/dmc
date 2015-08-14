@@ -13,13 +13,13 @@ var archiver = require('archiver');
 var logger   = require('../lib/logger');
 var hl       = logger.highlight;
 
-function createStubFiles(map) {
+function createStubFiles(map, client) {
   var keys = map.index.getMemberTypeNames();
 
   function iterator(obj, cb) {
     obj.oauth = map.oauth;
     logger.create(obj.type + '::' + hl(obj.object.name));
-    sfClient.tooling.insert(obj, function(err, res) {
+    client.tooling.insert(obj, function(err, res) {
       if(err) return cb(err);
       map.setMetaId(obj.type, obj.object.name, res.id);
       cb(null, res.id);
@@ -55,7 +55,7 @@ function createStubFiles(map) {
   });
 }
 
-function createStaticResources(map, oauth) {
+function createStaticResources(map, oauth, client) {
 
   function iterator(obj, cb) {
     fs.readFile(obj.path, { encoding: 'base64' }, function(err, body) {
@@ -76,7 +76,7 @@ function createStaticResources(map, oauth) {
 
       logger.log('executing StaticResource ' + method);
 
-      sfClient.tooling[method](opts, function(err, res) {
+      client.tooling[method](opts, function(err, res) {
         if(err) return cb(err);
         logger[(method === 'insert') ? 'create' : 'update']('StaticResource::' + obj.name);
         cb(null, res);
@@ -97,13 +97,13 @@ function createStaticResources(map, oauth) {
 }
 
 
-function createContainer(oauth) {
+function createContainer(oauth, client) {
   logger.log('creating container');
   var name = 'dmc:' + (new Date()).getTime();
 
   return new Promise(function(resolve, reject) {
 
-    sfClient.tooling.createContainer({ name: name, oauth: oauth }, function(err, container) {
+    client.tooling.createContainer({ name: name, oauth: oauth }, function(err, container) {
       if(err) return reject(err);
       logger.create('metadata container: ' + hl(container.id));
       resolve(container.id);
@@ -112,7 +112,7 @@ function createContainer(oauth) {
   });
 }
 
-function createDeployArtifacts(map, containerId, oauth) {
+function createDeployArtifacts(map, containerId, oauth, client) {
 
   var iterator = function(m, cb2) {
     if(map.index.getMemberTypeNames().indexOf(m.type) === -1) {
@@ -122,7 +122,7 @@ function createDeployArtifacts(map, containerId, oauth) {
     fs.readFile(m.path, { encoding: 'utf8' }, function(err, data) {
       if(err) return cb2(err);
 
-      var artifact = sfClient.tooling.createDeployArtifact(m.type + 'Member', {
+      var artifact = client.tooling.createDeployArtifact(m.type + 'Member', {
         body: data,
         contentEntityId: m.id
       });
@@ -137,7 +137,7 @@ function createDeployArtifacts(map, containerId, oauth) {
         oauth: oauth
       };
 
-      sfClient.tooling.addContainerArtifact(opts, function(err, resp) {
+      client.tooling.addContainerArtifact(opts, function(err, resp) {
         if(err) {
           logger.error('problem creating container artifact');
           return cb2(err);
@@ -170,7 +170,7 @@ function createDeployArtifacts(map, containerId, oauth) {
 
 }
 
-function deployContainer(containerId, oauth) {
+function deployContainer(containerId, oauth, client) {
 
   return new Promise(function(resolve, reject) {
 
@@ -193,7 +193,7 @@ function deployContainer(containerId, oauth) {
         oauth: opts.oauth
       };
 
-      sfClient.tooling.getContainerDeployStatus(pollOpts, function(err, resp) {
+      client.tooling.getContainerDeployStatus(pollOpts, function(err, resp) {
 
         if(err) return reject(err);
 
@@ -222,7 +222,7 @@ function deployContainer(containerId, oauth) {
       });
     }
 
-    sfClient.tooling.deployContainer(opts, function(err, asyncContainer) {
+    client.tooling.deployContainer(opts, function(err, asyncContainer) {
       if(err) return cb(err);
       logger.log('Deploying...');
       asyncContainerId = asyncContainer.id;
@@ -233,7 +233,7 @@ function deployContainer(containerId, oauth) {
 
 }
 
-function deleteContainer(containerId, oauth) {
+function deleteContainer(containerId, oauth, client) {
   var opts = {
     type: 'MetadataContainer',
     id: containerId,
@@ -241,7 +241,7 @@ function deleteContainer(containerId, oauth) {
   };
 
   return new Promise(function(resolve, reject) {
-    sfClient.tooling.delete(opts, function(err, res) {
+    client.tooling.delete(opts, function(err, res) {
       if(err) return reject(err);
       logger.destroy('metadata container: ' + hl(containerId));
       resolve(containerId);
@@ -249,7 +249,7 @@ function deleteContainer(containerId, oauth) {
   });
 }
 
-function runToolingDeploy(map, oauth) {
+function runToolingDeploy(map, oauth, client) {
   var containerId;
 
   return Promise.resolve()
@@ -264,7 +264,7 @@ function runToolingDeploy(map, oauth) {
     // create stub files if necessary
     .then(function() {
       logger.log('creating stub files');
-      return createStubFiles(map).then(function(stubs) {
+      return createStubFiles(map, client).then(function(stubs) {
         logger.log('created ' + hl(stubs.length) + ' stub files');
       });
     })
@@ -272,27 +272,27 @@ function runToolingDeploy(map, oauth) {
     // create static resources
     .then(function() {
       logger.log('creating static resources');
-      return createStaticResources(map, oauth).then(function(srs) {
+      return createStaticResources(map, oauth, client).then(function(srs) {
         logger.log('deployed ' + hl(srs.length) + ' static resources');
       });
     })
 
     .then(function(){
-      return createContainer(oauth);
+      return createContainer(oauth, client);
     })
 
     .then(function(id) {
       containerId = id;
-      return createDeployArtifacts(map, containerId, oauth);
+      return createDeployArtifacts(map, containerId, oauth, client);
     })
 
     .then(function(){
-      return deployContainer(containerId, oauth);
+      return deployContainer(containerId, oauth, client);
     })
 
     .finally(function() {
       if(containerId) {
-        return deleteContainer(containerId, oauth);
+        return deleteContainer(containerId, oauth, client);
       }
     });
 
@@ -359,24 +359,28 @@ function logDetails(res) {
   }
 
   if(res.details.runTestResult) {
-    logger.log('test results ====>');
-    logger.list('tests run: ' + res.details.runTestResult.numTestRun);
+    if(res.details.runTestResult.numFailures) {
+      logger.error('test results ====>');
+    } else {
+      logger.success('test results ====>');
+    }
+    logger.list('tests run: ' + res.details.runTestResult.numTestsRun);
     logger.list('failures: ' + res.details.runTestResult.numFailures);
     logger.list('total time: ' + res.details.runTestResult.totalTime);
 
     _.each(res.details.runTestResult.failures, function (f) {
-      console.log(f);
-    })
+      logger.error(f);
+    });
   }
 }
 
-function runMetadataDeploy(map, oauth) {
+function runMetadataDeploy(map, oauth, client) {
   logger.log('running metadata deploy');
 
   return new Promise(function(resolve, reject) {
     var archive = archiver('zip');
 
-    var promise = sfClient.meta.deployAndPoll({
+    var promise = client.meta.deployAndPoll({
       zipFile: archive,
       oauth: oauth,
       includeDetails: true,
@@ -387,7 +391,7 @@ function runMetadataDeploy(map, oauth) {
 
     // write the package.xml to the zip
     archive.append(
-      new Buffer(map.createPackageXML(sfClient.apiVersion)
+      new Buffer(map.createPackageXML(client.apiVersion)
     ), { name: 'src/package.xml' });
 
     promise.poller.on('poll', function(res) {
@@ -457,6 +461,7 @@ function runMetadataDeploy(map, oauth) {
 var run = module.exports.run = function(opts, cb) {
 
   var containerId;
+  var client;
   var oauth = opts.oauth;
   var globs = opts.globs;
 
@@ -467,8 +472,13 @@ var run = module.exports.run = function(opts, cb) {
 
   return Promise.resolve()
 
+  .then(function(){
+    return sfClient.getClient(opts.oauth);
+  })
+
   // load the index for the org
-  .then(function() {
+  .then(function(sfdcClient) {
+    client = sfdcClient;
     return map.autoLoad();
   })
 
@@ -487,9 +497,9 @@ var run = module.exports.run = function(opts, cb) {
   .then(function() {
 
     if(!map.requiresMetadataDeploy() && !opts.meta) {
-      return runToolingDeploy(map, oauth);
+      return runToolingDeploy(map, oauth, client);
     } else {
-      return runMetadataDeploy(map, oauth);
+      return runMetadataDeploy(map, oauth, client);
     }
   })
 

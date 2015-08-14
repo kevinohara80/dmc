@@ -391,14 +391,7 @@ function runMetadataDeploy(map, oauth) {
     ), { name: 'src/package.xml' });
 
     promise.poller.on('poll', function(res) {
-
-      var logs = [];
-
-      logs.push('deploy status: ' + hl(res.status));
-      if(res.stateDetail) logs.push('state: ' + res.stateDetail);
-      logs.push('components: deployed ' + res.numberComponentsDeployed + '/' +res.numberComponentsTotal);
-
-      logger.log(logs);
+      logger.log('deploy status: ' + hl(res.status));
     });
 
     promise.then(function(results){

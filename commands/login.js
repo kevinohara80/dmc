@@ -30,6 +30,8 @@ var run = module.exports.run = function(opts) {
       logger.log('saving credentials for ' + opts.org);
       creds.nick = opts.org;
       creds.org = opts.org;
+      creds.environment = clientOpts.environment;
+      creds.loginUri = opts.uri;
       user.saveCredential(opts.org, creds).then(function(){
         return index.run({ org: opts.org, oauth: creds}, function(err, res) {
           if(err) {

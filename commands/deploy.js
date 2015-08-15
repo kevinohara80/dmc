@@ -136,7 +136,7 @@ function createDeployArtifacts(map, containerId, client) {
 
       client.tooling.addContainerArtifact(opts, function(err, resp) {
         if(err) {
-          logger.error('problem creating container artifact');
+          logger.error('problem creating container artifact: ' + m.type + '::' + m.name);
           return cb2(err);
         }
         logger.create('container member: ' + m.type + '::' + m.name);
@@ -195,7 +195,7 @@ function deployContainer(containerId, client) {
         logStatus(resp.State);
 
         if(resp.State === 'Completed') {
-          logger.log('deployment successful');
+          logger.success('deployment successful');
           return resolve(resp);
         } else if(resp.State === 'Failed') {
           logger.error('CompilerErrors');

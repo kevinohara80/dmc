@@ -234,6 +234,11 @@ var run = module.exports.run = function(opts, cb) {
     return removeTmpDir();
   })
 
+  .then(function() {
+    logger.success('retrieve successful');
+    cb();
+  })
+
   .catch(function(err) {
     cb(err);
   });

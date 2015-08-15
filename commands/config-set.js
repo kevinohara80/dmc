@@ -50,7 +50,8 @@ var run = module.exports.run = function(opts, cb) {
     logger.log('saving configuration');
     return cfg.save();
   }).then(function(){
-    logger.log('configuration saved');
+    logger.success('configuration saved');
+    cb();
   }).catch(function(err) {
     cb(err);
   });

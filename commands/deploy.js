@@ -456,7 +456,9 @@ var run = module.exports.run = function(opts, cb) {
   var containerId;
   var client;
   var oauth = opts.oauth;
-  var globs = opts.globs;
+  var globs = (opts.globs && opts.globs.length > 0) ?
+    opts.globs:
+    ['src/**/*'];
 
   var map = metaMap.createMap({
     oauth: opts.oauth,

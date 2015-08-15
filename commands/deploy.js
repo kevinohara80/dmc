@@ -198,8 +198,8 @@ function deployContainer(containerId, client) {
           logger.success('deployment successful');
           return resolve(resp);
         } else if(resp.State === 'Failed') {
-          logger.error('CompilerErrors');
-          console.log(resp);
+          var msg = resp.ErrorMsg || 'unknown error occurred';
+          logger.error(msg);
           _.each(resp.CompilerErrors, function(e) {
             logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
             logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);

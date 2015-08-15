@@ -7,9 +7,9 @@ var spawn      = require('child_process').spawn;
 
 var run = module.exports.run = function(opts, cb) {
 
-  sfClient.getIdentity({ oauth: opts.oauth }, function(err, res) {
-    if(err) return cb(err);
-
+  sfClient.getClient(opts.oauth).then(function(client) {
+    return client.getIdentity();
+  }).then(function(res) {
     logger.log('logging in: ' + res.username);
 
     var url = opts.oauth.instance_url +
@@ -24,7 +24,11 @@ var run = module.exports.run = function(opts, cb) {
       logger.log('open command complete');
       cb();
     });
-
+  }).catch(function(err) {
+    if(err) {
+      logger.error('unable to open ' + opts.org);
+      cb(err);
+    }
   });
 
 };

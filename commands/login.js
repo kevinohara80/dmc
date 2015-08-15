@@ -25,13 +25,16 @@ var run = module.exports.run = function(opts) {
 
     authServer.on('credentials', function(creds) {
       logger.log('received credentials');
-      authServer.close();
       logger.log('shutting down server');
-      logger.log('saving credentials for ' + opts.org);
-      creds.nick = opts.org;
-      creds.org = opts.org;
+
+      authServer.close();
+      
+      creds.nick        = opts.org;
+      creds.org         = opts.org;
       creds.environment = clientOpts.environment;
-      creds.loginUri = opts.uri;
+      creds.loginUri    = opts.uri;
+
+      logger.log('saving credentials for ' + opts.org);
       user.saveCredential(opts.org, creds).then(function(){
         return index.run({ org: opts.org, oauth: creds}, function(err, res) {
           if(err) {

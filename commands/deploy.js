@@ -17,7 +17,6 @@ function createStubFiles(map, client) {
   var keys = map.index.getMemberTypeNames();
 
   function iterator(obj, cb) {
-    obj.oauth = map.oauth;
     logger.create(obj.type + '::' + hl(obj.object.name));
     client.tooling.insert(obj, function(err, res) {
       if(err) return cb(err);
@@ -55,7 +54,7 @@ function createStubFiles(map, client) {
   });
 }
 
-function createStaticResources(map, oauth, client) {
+function createStaticResources(map, client) {
 
   function iterator(obj, cb) {
     fs.readFile(obj.path, { encoding: 'base64' }, function(err, body) {
@@ -63,7 +62,6 @@ function createStaticResources(map, oauth, client) {
 
       var opts = {
         id: obj.id,
-        oauth: oauth,
         type: 'StaticResource',
         object: {
           name: obj.name,
@@ -97,13 +95,13 @@ function createStaticResources(map, oauth, client) {
 }
 
 
-function createContainer(oauth, client) {
+function createContainer(client) {
   logger.log('creating container');
   var name = 'dmc:' + (new Date()).getTime();
 
   return new Promise(function(resolve, reject) {
 
-    client.tooling.createContainer({ name: name, oauth: oauth }, function(err, container) {
+    client.tooling.createContainer({ name: name }, function(err, container) {
       if(err) return reject(err);
       logger.create('metadata container: ' + hl(container.id));
       resolve(container.id);
@@ -112,7 +110,7 @@ function createContainer(oauth, client) {
   });
 }
 
-function createDeployArtifacts(map, containerId, oauth, client) {
+function createDeployArtifacts(map, containerId, client) {
 
   var iterator = function(m, cb2) {
     if(map.index.getMemberTypeNames().indexOf(m.type) === -1) {
@@ -133,8 +131,7 @@ function createDeployArtifacts(map, containerId, oauth, client) {
 
       var opts = {
         id: containerId,
-        artifact: artifact,
-        oauth: oauth
+        artifact: artifact
       };
 
       client.tooling.addContainerArtifact(opts, function(err, resp) {
@@ -170,7 +167,7 @@ function createDeployArtifacts(map, containerId, oauth, client) {
 
 }
 
-function deployContainer(containerId, oauth, client) {
+function deployContainer(containerId, client) {
 
   return new Promise(function(resolve, reject) {
 
@@ -178,8 +175,7 @@ function deployContainer(containerId, oauth, client) {
 
     var opts = {
       id:          containerId,
-      isCheckOnly: false,
-      oauth:       oauth
+      isCheckOnly: false
     };
 
     function logStatus(status) {
@@ -189,8 +185,7 @@ function deployContainer(containerId, oauth, client) {
     function poll() {
 
       var pollOpts = {
-        id: asyncContainerId,
-        oauth: opts.oauth
+        id: asyncContainerId
       };
 
       client.tooling.getContainerDeployStatus(pollOpts, function(err, resp) {
@@ -233,11 +228,10 @@ function deployContainer(containerId, oauth, client) {
 
 }
 
-function deleteContainer(containerId, oauth, client) {
+function deleteContainer(containerId, client) {
   var opts = {
     type: 'MetadataContainer',
-    id: containerId,
-    oauth: oauth
+    id: containerId
   };
 
   return new Promise(function(resolve, reject) {
@@ -249,7 +243,7 @@ function deleteContainer(containerId, oauth, client) {
   });
 }
 
-function runToolingDeploy(map, oauth, client) {
+function runToolingDeploy(map, client) {
   var containerId;
 
   return Promise.resolve()
@@ -272,27 +266,27 @@ function runToolingDeploy(map, oauth, client) {
     // create static resources
     .then(function() {
       logger.log('creating static resources');
-      return createStaticResources(map, oauth, client).then(function(srs) {
+      return createStaticResources(map, client).then(function(srs) {
         logger.log('deployed ' + hl(srs.length) + ' static resources');
       });
     })
 
     .then(function(){
-      return createContainer(oauth, client);
+      return createContainer(client);
     })
 
     .then(function(id) {
       containerId = id;
-      return createDeployArtifacts(map, containerId, oauth, client);
+      return createDeployArtifacts(map, containerId, client);
     })
 
     .then(function(){
-      return deployContainer(containerId, oauth, client);
+      return deployContainer(containerId, client);
     })
 
     .finally(function() {
       if(containerId) {
-        return deleteContainer(containerId, oauth, client);
+        return deleteContainer(containerId, client);
       }
     });
 
@@ -374,7 +368,7 @@ function logDetails(res) {
   }
 }
 
-function runMetadataDeploy(map, oauth, client) {
+function runMetadataDeploy(map, client) {
   logger.log('running metadata deploy');
 
   return new Promise(function(resolve, reject) {
@@ -382,7 +376,6 @@ function runMetadataDeploy(map, oauth, client) {
 
     var promise = client.meta.deployAndPoll({
       zipFile: archive,
-      oauth: oauth,
       includeDetails: true,
       deployOptions: {
         rollbackOnError: true
@@ -497,9 +490,9 @@ var run = module.exports.run = function(opts, cb) {
   .then(function() {
 
     if(!map.requiresMetadataDeploy() && !opts.meta) {
-      return runToolingDeploy(map, oauth, client);
+      return runToolingDeploy(map, client);
     } else {
-      return runMetadataDeploy(map, oauth, client);
+      return runMetadataDeploy(map, client);
     }
   })
 

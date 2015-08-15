@@ -21,7 +21,6 @@ function getFilePaths(typeGroups, oauth, client) {
 
     var iterator = function(types, cb) {
       client.meta.listMetadata({
-        oauth: oauth,
         queries: _.map(types, function(t) {
           return {
             type: t.name
@@ -194,7 +193,6 @@ var run = module.exports.run = function(opts, cb) {
     var apiVersion = client.apiVersion.replace('v', '');
 
     var promise = client.meta.retrieveAndPoll({
-      oauth: opts.oauth,
       apiVersion: apiVersion,
       unpackaged: {
         version: apiVersion,

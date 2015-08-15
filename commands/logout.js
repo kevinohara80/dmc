@@ -4,20 +4,26 @@ var user     = require('../lib/user');
 var sfClient = require('../lib/sf-client');
 var cliUtil  = require('../lib/cli-util');
 var config   = require('../lib/config');
+var index    = require('../lib/index');
 var async    = require('async');
 
 var run = module.exports.run = function(opts, cb) {
 
   function revokeToken(tokenType) {
     logger.log('revoking ' + tokenType + ' token');
-    return sfClient.revokeToken({
-      oauth: opts.oauth,
-      token: opts.oauth[tokenType + '_token']
-    }).then(function(){
-      logger.log(tokenType + ' token revoked');
-    }).catch(function(err) {
-      logger.log(tokenType + ' token not revoked: invalid');
-    });
+
+    return sfClient.getClient(opts.oauth)
+      .then(function(client) {
+        return client.revokeToken({
+          token: opts.oauth[tokenType + '_token']
+        });
+      })
+      .then(function(){
+        logger.log(tokenType + ' token revoked');
+      })
+      .catch(function(err) {
+        logger.log(tokenType + ' token not revoked: invalid');
+      });
   }
 
   function deleteCredential() {
@@ -35,7 +41,9 @@ var run = module.exports.run = function(opts, cb) {
   }
 
   function deleteIndex() {
-
+    var idx = index.init(opts.org, opts.oauth);
+    logger.log('cleaning up index cache');
+    return idx.destroy();
   }
 
   return Promise.resolve().then(function() {
@@ -50,6 +58,9 @@ var run = module.exports.run = function(opts, cb) {
       unsetDefaultOrg('local'),
       unsetDefaultOrg('global')
     ]);
+
+  }).then(function() {
+    return deleteIndex();
   }).then(function(){
     return deleteCredential();
   }).then(cb).catch(cb);

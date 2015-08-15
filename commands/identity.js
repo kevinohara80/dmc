@@ -18,7 +18,7 @@ function flattenAndFilter(obj, fields, pre) {
 var run = module.exports.run = function(opts, cb) {
   var oauth = opts.oauth;
 
-  sfClient.getClient().then(function(client) {
+  sfClient.getClient(opts.oauth).then(function(client) {
     return client.getIdentity( { oauth: opts.oauth });
   }).then(function(res) {
     flattenAndFilter(res, opts.fields);

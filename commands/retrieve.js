@@ -184,10 +184,16 @@ var run = module.exports.run = function(opts, cb) {
   })
 
   .then(function(fpaths){
+    if(!fpaths || fpaths.length < 1) {
+      throw new Error('no files found for retrieve');
+    }
     return filterOnGlobs(fpaths, opts.globs);
   })
 
   .then(function(filteredPaths) {
+    if(!filteredPaths || filteredPaths.length < 1) {
+      throw new Error('no files found for retrieve');
+    }
     map.addFiles(filteredPaths);
 
     var apiVersion = client.apiVersion.replace('v', '');

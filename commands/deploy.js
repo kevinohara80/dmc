@@ -480,7 +480,9 @@ var run = module.exports.run = function(opts, cb) {
     logger.log('searching for local metadata');
     return getFiles({ globs: globs }).then(function(files) {
 
-      if(!files.length) throw new Error('no files for deployment found');
+      if(!files || files.length < 1) {
+        throw new Error('no files for deployment found');
+      }
 
       logger.log('deploying ' + hl(files.length) + ' metadata files');
       map.addFiles(files);

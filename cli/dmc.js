@@ -38,6 +38,7 @@ loadCommand('identity');
 // loadCommand('create');
 loadCommand('deploy');
 loadCommand('retrieve');
+loadCommand('watch');
 // loadCommand('destroy');
 // loadCommand('anon');
 loadCommand('resources');

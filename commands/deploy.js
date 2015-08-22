@@ -500,6 +500,10 @@ var run = module.exports.run = function(opts, cb) {
     }
   })
 
+  .then(function(){
+    cb();
+  })
+
   .catch(function(err) {
     cb(err);
   });

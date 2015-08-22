@@ -110,7 +110,7 @@ $ dmc deploy src/classes/*_test.cls src/classes/MyClass* src/pages/MyPage*
 
 More info on globbing pattens can be found [here](http://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm).
 
-### Important on Globbing and Shells
+#### Important Note on Globbing and Shells
 
 On \*nix system shells, globbing patterns are automatically processed by your
 shell before the executable is called. This is fine for deploys but retrieves

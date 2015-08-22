@@ -14,6 +14,8 @@ var glob      = require('glob');
 var AdmZip    = require('adm-zip');
 var rimraf    = require('rimraf');
 
+var rimrafAsync = Promise.promisify(rimraf);
+
 var matchOpts = { matchBase: true };
 
 function getFilePaths(typeGroups, oauth, client) {
@@ -112,30 +114,30 @@ function unzipToTmp(zipBase64) {
   });
 }
 
-function copyFiles() {
+function copyFiles(replace) {
   return new Promise(function(resolve, reject) {
 
-    glob('**/*', { cwd: paths.dir.tmp + '/unpackaged' }, function(err, files) {
-      if(err) return reject(err);
+    var tmpPkgContents;
+    var copyOpts = {};
+    var tmpPkgFile = paths.dir.tmp + '/unpackaged/package.xml';
 
-      Promise.map(files, function(file) {
-        if(file === 'package.xml') return Promise.resolve();
-        logger.list('copying file: ' + file);
-        return fs.copyAsync(
-          paths.dir.tmp + '/unpackaged/' + file,
-          process.cwd() + '/src/' + file,
-          { clobber: true }
-        );
-      }, { /* concurrency: 5 */ }).then(function(){
+    fs.readFileAsync(tmpPkgFile, { encoding: 'utf8' })
+      .then(function(result) {
+        tmpPkgContents = result;
+        if(!replace) return rimrafAsync(tmpPkgFile);
+      })
+      .then(function() {
+        var tmpSrcDir = paths.dir.tmp + '/unpackaged/';
+        var srcDir = process.cwd() + '/src/';
+        return fs.copyAsync(tmpSrcDir, srcDir, copyOpts);
+      })
+      .then(function() {
         resolve();
-      }).catch(function(err) {
-        _.each(err, function(e) {
-          logger.error(e.message);
-        });
-        reject(new Error('file copy errors'));
+      })
+      .catch(function(err) {
+        logger.error(err.message);
+        reject(err);
       });
-
-    });
   });
 }
 
@@ -226,7 +228,7 @@ var run = module.exports.run = function(opts, cb) {
 
   .then(function(){
     logger.log('merging files to src');
-    return copyFiles();
+    return copyFiles(opts.replace);
   })
 
   .then(function() {

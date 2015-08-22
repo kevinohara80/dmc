@@ -8,7 +8,7 @@ dmc
 `dmc` is a cross-platform, CLI developer tool for Salesforce.com. `dmc` aims
 to provide a CLI interface to salesforce.com development that abstracts the
 complexities of dealing with API's and metadata into a simple tool that
-makes everything feel like local and remote file system operations. Basically,
+**_makes everything feel like local and remote file system operations_**. Basically,
 the goal is to create a tool that is as intuitive to use as normal file system
 tools like `cp` and `rsync`.
 

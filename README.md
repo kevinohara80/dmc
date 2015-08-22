@@ -8,7 +8,9 @@ dmc
 `dmc` is a cross-platform, CLI developer tool for Salesforce.com. `dmc` aims
 to provide a CLI interface to salesforce.com development that abstracts the
 complexities of dealing with API's and metadata into a simple tool that
-makes everything feel like local and remote file system operations.
+makes everything feel like local and remote file system operations. Basically,
+the goal is to create a tool that is as intuitive to use as normal file system
+tools like `cp` and `rsync`.
 
 `dmc` was built to be used on the command line but it's modules are exposed
 in a way that make it able to be used as a regular node modules in your
@@ -79,6 +81,61 @@ stores credentials that can be used wherever and whenever you need to. This
 also comes in handy when you're working in a project but need to deploy it
 to multiple targets.
 
+### Globbing Patterns
+
+Operations on metadata like `deploy` and `retrieve` are accomplished using
+file system globbing patterns. The same globbing patterns you use for deploying
+will work for retrieving, and vice versa.
+
+The best way to understand this is to look at some examples:
+
+```bash
+$ dmc deploy src/classes/*  // deploy all classes
+$ dmc retrieve src/{classes,pages}/* // retrieve all classes and pages
+$ dmc deploy src/**/*
+$ dmc retrieve src/**/* // retrieve all metadata (there will be a lot)
+```
+
+Globbing patterns are powerful. Here's some advanced examples.
+
+```
+$ dmc deploy src/{classes,pages}/Foo* // would match FooClass.cls FooPage.page
+```
+
+`dmc` also supports multiple globs for deploys/retrieves.
+
+```bash
+$ dmc deploy src/classes/*_test.cls src/classes/MyClass* src/pages/MyPage*
+```
+
+More info on globbing pattens can be found [here](http://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm).
+
+### Important on Globbing and Shells
+
+On \*nix system shells, globbing patterns are automatically processed by your
+shell before the executable is called. This is fine for deploys but retrieves
+require a bit of additional thought.
+
+For example, let's say that you want to retrieve all classes but several of
+those classes don't yet exist in your local `src/classes` directory. Running
+this command would not really work...
+
+```bash
+$ dmc retrieve src/classes/*
+```
+
+This isn't reliable because the glob pattern will actually be processed by your
+shell before the patterns are sent to `dmc`. Therefore, the only files that
+would be retrieved would be the files that currently reside on your local
+filesystem.
+
+The good news is that this is easily fixed by wrapping the glob pattern(s) in
+quotes.
+
+```bash
+$ dmc retrieve 'src/classes/*' // this will get all remote classes
+```
+
 ### Configuration
 
 `dmc` has a configuration system that allow a developer to set global
@@ -100,11 +157,18 @@ a proposal in the form of an issue to this repo. That way, we as a community
 can determine whether or not it should be a part of the project before you
 spend a bunch of your free time on building it.
 * **PR Format**: When submitting a PR, please make sure of the following:
-  * Include only a single commit. You can squash multiple commits with a rebase prior
-  to submitting the PR.
+  * Include only a single commit. You can squash multiple commits with a rebase
+  prior to submitting the PR.
   * Ensure your commit is rebased from the target branch.
   * Reference any issue numbers that the PR resolves
 * **Tests**: Whenever possible, include unit tests with your PR.
 * **Clean Builds**: There is a very simple gulp build included with this project
-that runs jshint and unit tests. You are encouraged to run this before submitting
-your PR to make sure that all tests pass and that jshint rules are enforced.
+that runs jshint and unit tests. You are encouraged to run this before
+submitting
+
+## Roadmap
+
+* Implementation of `.dmcignore`
+* Execute anonymous
+* Test Execution
+* Lots of other stuff

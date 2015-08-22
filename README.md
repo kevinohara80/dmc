@@ -90,10 +90,10 @@ will work for retrieving, and vice versa.
 The best way to understand this is to look at some examples:
 
 ```bash
-$ dmc deploy src/classes/*  // deploy all classes
+$ dmc deploy src/classes/*           // deploy all classes
 $ dmc retrieve src/{classes,pages}/* // retrieve all classes and pages
-$ dmc deploy src/**/*
-$ dmc retrieve src/**/* // retrieve all metadata (there will be a lot)
+$ dmc deploy src/**/*                // deploy everything in src dir
+$ dmc retrieve src/**/*              // retrieve all metadata (there will be a lot)
 ```
 
 Globbing patterns are powerful. Here's some advanced examples.

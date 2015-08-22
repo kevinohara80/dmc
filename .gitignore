@@ -29,3 +29,6 @@ node_modules
 
 # Test Stuff
 test/.tmp
+
+# OSX
+*.DS_Store

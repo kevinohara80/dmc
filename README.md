@@ -151,6 +151,24 @@ $ dmc watch src/**/*  # watch files and deploy to your default org
 $ dmc watch src/**/* --org myorg  # deploy to a specific org
 ```
 
+### .dmcignore
+
+You can add a `.dmcignore` file to the root directory of your
+projects. It should reside in the same directory as your `src/`
+folder. This file can be used to automatically exclude files
+from `deploy` and `retrieve` calls. This is handy for excluding
+files like `mm.log` files from MavensMate.
+
+`.dmcignore` file:
+
+```ini
+# exclude log files
+*mm.log
+
+# exclude all pages starting with foo
+src/pages/Foo*
+```
+
 ### Configuration
 
 `dmc` has a configuration system that allow a developer to set global

@@ -92,16 +92,16 @@ will work for retrieving, and vice versa.
 The best way to understand this is to look at some examples:
 
 ```bash
-$ dmc deploy src/classes/*           // deploy all classes
-$ dmc retrieve src/{classes,pages}/* // retrieve all classes and pages
-$ dmc deploy src/**/*                // deploy everything in src dir
-$ dmc retrieve src/**/*              // retrieve all metadata (there will be a lot)
+$ dmc deploy src/classes/*            # deploy all classes
+$ dmc retrieve src/{classes,pages}/*  # retrieve all classes and pages
+$ dmc deploy src/**/*                 # deploy everything in src dir
+$ dmc retrieve src/**/*               # retrieve all metadata (there will be a lot)
 ```
 
 Globbing patterns are powerful. Here's some advanced examples.
 
 ```
-$ dmc deploy src/{classes,pages}/Foo* // would match FooClass.cls FooPage.page
+$ dmc deploy src/{classes,pages}/Foo*  # would match FooClass.cls FooPage.page
 ```
 
 `dmc` also supports multiple globs for deploys/retrieves.
@@ -135,7 +135,7 @@ The good news is that this is easily fixed by wrapping the glob pattern(s) in
 quotes.
 
 ```bash
-$ dmc retrieve 'src/classes/*' // this will get all remote classes
+$ dmc retrieve 'src/classes/*'  # this will get all remote classes
 ```
 
 ### Watching Files
@@ -145,11 +145,11 @@ when files change. This gives you compile-on-save functionality while using
 any editor or IDE that you like. It's easy...
 
 ```bash
-$ dmc watch src/**/*  // watch files and deploy to your default org
+$ dmc watch src/**/*  # watch files and deploy to your default org
 ```
 
 ```bash
-$ dmc watch src/**/* --org myorg // deploy to a specific org
+$ dmc watch src/**/* --org myorg  # deploy to a specific org
 ```
 
 ### Configuration

@@ -40,7 +40,7 @@ usage information.
     logins                           list your salesforce logins
     login [options] <org>            login to a Salesforce organization
     logout [org]                     logout of a Salesforce organization
-    use [options] <org>              quickly set your default org in your configruation
+    use [options] <org>              quickly set your default org in your configuration
     index [options] [org]            indexes metadata for a target org
     open [org]                       open the target org in a browser window
     identity [options]               show the identity for the specified org
@@ -85,9 +85,9 @@ to multiple targets.
 
 ### Globbing Patterns
 
-One of the most powerful features of `dmc` is the ability to perform operations 
-on metadata like `deploy` and `retrieve` using filesystem globbing patterns. 
-The same globbing patterns you use for deploying will work for retrieving, 
+One of the most powerful features of `dmc` is the ability to perform operations
+on metadata like `deploy` and `retrieve` using filesystem globbing patterns.
+The same globbing patterns you use for deploying will work for retrieving,
 and vice versa. The best way to understand this is to look at some examples:
 
 ```bash

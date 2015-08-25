@@ -59,7 +59,7 @@ var run = module.exports.run = function(opts, cb) {
 
 module.exports.cli = function(program) {
   program.command('use <org>')
-    .description('quickly set your default org in your configruation')
+    .description('quickly set your default org in your configuration')
     .option('-g, --global', 'Set your default org in your global configuration')
     .action(function(org, opts) {
       opts.org = org;

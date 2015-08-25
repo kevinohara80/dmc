@@ -13,6 +13,7 @@ var fs        = require('../lib/fs');
 var glob      = require('glob');
 var AdmZip    = require('adm-zip');
 var rimraf    = require('rimraf');
+var dmcignore = require('../lib/dmcignore');
 
 var rimrafAsync = Promise.promisify(rimraf);
 
@@ -71,18 +72,32 @@ function getFilePaths(typeGroups, oauth, client) {
   });
 }
 
-function filterOnGlobs(paths, globs) {
+function filterOnGlobs(paths, ignores, globs) {
   return _(paths)
     .filter(function(p) {
       var match = false;
+      var ignored = false;
 
+      // first process ignores from .gitignore
+      if(ignores && ignores.length) {
+        _.each(ignores, function(i) {
+          if(minimatch(p, i, matchOpts)) {
+            ignored = true;
+            return false;
+          }
+        });
+      }
+
+      if(ignored === true) return false;
+
+      // next process glob matches
       _.each(globs, function(g) {
         if(minimatch(p, g, matchOpts)) {
           match = true;
           return false;
         }
       });
-
+      
       return match;
     })
     .value();
@@ -161,7 +176,15 @@ var run = module.exports.run = function(opts, cb) {
     org: opts.org
   });
 
+  var ignores = null;
+
   return Promise.resolve()
+
+  .then(function() {
+    dmcignore.load().then(function(lines) {
+      ignores = lines;
+    });
+  })
 
   .then(function() {
     return sfClient.getClient(opts.oauth);
@@ -189,7 +212,7 @@ var run = module.exports.run = function(opts, cb) {
     if(!fpaths || fpaths.length < 1) {
       throw new Error('no files found for retrieve');
     }
-    return filterOnGlobs(fpaths, opts.globs);
+    return filterOnGlobs(fpaths, ignores, opts.globs);
   })
 
   .then(function(filteredPaths) {

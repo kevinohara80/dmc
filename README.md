@@ -85,11 +85,10 @@ to multiple targets.
 
 ### Globbing Patterns
 
-Operations on metadata like `deploy` and `retrieve` are accomplished using
-file system globbing patterns. The same globbing patterns you use for deploying
-will work for retrieving, and vice versa.
-
-The best way to understand this is to look at some examples:
+One of the most powerful features of `dmc` is the ability to perform operations 
+on metadata like `deploy` and `retrieve` using filesystem globbing patterns. 
+The same globbing patterns you use for deploying will work for retrieving, 
+and vice versa. The best way to understand this is to look at some examples:
 
 ```bash
 $ dmc deploy src/classes/*            # deploy all classes

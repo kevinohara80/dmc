@@ -136,6 +136,20 @@ quotes.
 $ dmc retrieve 'src/classes/*' // this will get all remote classes
 ```
 
+### Watching Files
+
+`dmc` has a `watch` command that let's you listen to file changes and deploy
+when files change. This gives you compile-on-save functionality while using
+any editor or IDE that you like. It's easy...
+
+```bash
+$ dmc watch src/**/*  // watch files and deploy to your default org
+```
+
+```bash
+$ dmc watch src/**/* --org myorg // deploy to a specific org
+```
+
 ### Configuration
 
 `dmc` has a configuration system that allow a developer to set global

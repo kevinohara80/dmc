@@ -1,17 +1,18 @@
-var fs       = require('fs-extra');
-var user     = require('../lib/user');
-var cliUtil  = require('../lib/cli-util');
-var sfClient = require('../lib/sf-client');
-var index    = require('../lib/index');
-var metaMap  = require('../lib/metadata-map');
-var getFiles = require('../lib/get-files');
-var Promise  = require('bluebird');
-var path     = require('path');
-var async    = require('async');
-var _        = require('lodash');
-var archiver = require('archiver');
-var logger   = require('../lib/logger');
-var hl       = logger.highlight;
+var fs        = require('fs-extra');
+var user      = require('../lib/user');
+var cliUtil   = require('../lib/cli-util');
+var sfClient  = require('../lib/sf-client');
+var index     = require('../lib/index');
+var metaMap   = require('../lib/metadata-map');
+var getFiles  = require('../lib/get-files');
+var Promise   = require('bluebird');
+var path      = require('path');
+var async     = require('async');
+var _         = require('lodash');
+var archiver  = require('archiver');
+var logger    = require('../lib/logger');
+var dmcignore = require('../lib/dmcignore');
+var hl        = logger.highlight;
 
 function createStubFiles(map, client) {
   var keys = map.index.getMemberTypeNames();
@@ -465,7 +466,15 @@ var run = module.exports.run = function(opts, cb) {
     org:   opts.org
   });
 
+  var ignores = null;
+
   return Promise.resolve()
+
+  .then(function(){
+    dmcignore.load().then(function(lines) {
+      ignores = lines;
+    });
+  })
 
   .then(function(){
     return sfClient.getClient(opts.oauth);
@@ -480,15 +489,14 @@ var run = module.exports.run = function(opts, cb) {
   // search src/ for file matches
   .then(function() {
     logger.log('searching for local metadata');
-    return getFiles({ globs: globs }).then(function(files) {
-
-      if(!files || files.length < 1) {
-        throw new Error('no files for deployment found');
-      }
-
-      logger.log('deploying ' + hl(files.length) + ' metadata files');
-      map.addFiles(files);
-    });
+    return getFiles({ globs: globs, ignores: ignores })
+      .then(function(files) {
+        if(!files || files.length < 1) {
+          throw new Error('no files for deployment found');
+        }
+        logger.log('deploying ' + hl(files.length) + ' metadata files');
+        map.addFiles(files);
+      });
   })
 
   .then(function() {

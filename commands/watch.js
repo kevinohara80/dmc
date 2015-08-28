@@ -17,6 +17,10 @@ var globOpts = {
 
 var run = module.exports.run = function(opts, cb) {
 
+  if(!opts.globs || !opts.globs.length) {
+    opts.globs = [ 'src/**/*' ];
+  }
+
   Promise.reduce(opts.globs, function(allFiles, file) {
     return glob(file, globOpts).then(function(files) {
       return allFiles.concat(files);

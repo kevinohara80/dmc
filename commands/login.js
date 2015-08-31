@@ -4,7 +4,7 @@ var authServer = require('../lib/auth-server');
 var index      = require('../commands/index');
 var sfClient   = require('../lib/sf-client');
 var cliUtil    = require('../lib/cli-util');
-var spawn      = require('child_process').spawn;
+var open       = require('open');
 var user       = require('../lib/user');
 
 var run = module.exports.run = function(opts) {
@@ -52,8 +52,7 @@ var run = module.exports.run = function(opts) {
       logger.log('auth server started');
       logger.log('redirect to the following uri');
       logger.log(authUri);
-      // probably only works on Mac right now
-      spawn('open', [authUri]);
+      open(authUri);
     });
   });
 

@@ -53,6 +53,7 @@
     "nforce-metadata": "^1.0.5",
     "nforce-tooling": "0.0.4",
     "node-watch": "^0.3.4",
+    "open": "0.0.5",
     "rimraf": "^2.3.2",
     "soap": "^0.6.0"
   }

@@ -107,6 +107,15 @@ describe('lib/index.js', function() {
 
   describe('index#save', function(){
 
+    it('should return a promise', function(done) {
+      var idx = index.init('test_index', {});
+      idx.loadFromFile().then(function() {
+        var result = idx.save();
+        should(result).be.an.Object.and.have.property('then').which.is.a.Function;
+        done();
+      });
+    });
+
     it('should allow for saving an index', function(done) {
       var idx = index.init('test_index', {});
 

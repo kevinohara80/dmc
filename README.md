@@ -173,7 +173,7 @@ src/pages/Foo*
 
 `dmc` has a configuration system that allow a developer to set global
 configuration options as well as override those at a project level.
-Setting up project-level confiuration is completely optional.
+Setting up project-level configuration is completely optional.
 
 ## Contributing
 

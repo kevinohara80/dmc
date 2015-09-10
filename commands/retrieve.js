@@ -97,7 +97,7 @@ function filterOnGlobs(paths, ignores, globs) {
           return false;
         }
       });
-      
+
       return match;
     })
     .value();

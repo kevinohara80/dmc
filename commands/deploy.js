@@ -147,8 +147,6 @@ function createDeployArtifacts(map, containerId, client) {
     });
   };
 
-  //console.log(files);
-
   return new Promise(function(resolve, reject) {
 
     var files = _(map.meta)
@@ -396,7 +394,6 @@ function runMetadataDeploy(map, client) {
       logDetails(results);
       resolve();
     }).catch(function(err) {
-      console.error(err);
       if(err.details) {
         logDetails(err);
       } else {
@@ -408,19 +405,43 @@ function runMetadataDeploy(map, client) {
     // iterator for adding files
     // checks for existence and adds
     function iterator(p, cb) {
-      fs.existsAsync(p).then(function(exists) {
-        if(exists) {
-          logger.list(p);
-          // add the file to the zip
-          archive.file(p);
-        } else {
-          logger.error('missing file: ' + p);
+      // fs.existsAsync(p).then(function(exists) {
+      //   if(exists) {
+      //     logger.list(p);
+      //     // add the file to the zip
+      //     archive.file(p);
+      //   } else {
+      //     logger.error('missing file: ' + p);
+      //   }
+      //   return cb(null, {
+      //     file: p,
+      //     exists: exists
+      //   });
+      // });
+      var exists;
+
+      fs.existsAsync(p).then(function(e) {
+        exists = e;
+
+        if(!exists) {
+          throw new Error('missing file: ' + p);
         }
-        return cb(null, {
+
+        return fs.lstatAsync(p);
+      }).then(function(stat) {
+        if(stat.isDirectory()) {
+          archive.directory(p);
+        } else {
+          archive.file(p);
+        }
+        logger.list(p);
+
+        cb(null, {
           file: p,
           exists: exists
         });
       });
+
     }
 
     logger.log('adding metadata');

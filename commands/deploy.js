@@ -178,7 +178,7 @@ function deployContainer(containerId, client) {
     };
 
     function logStatus(status) {
-      logger.list('deploy status: ' + status);
+      logger.list('deploy status: ' + hl(status));
     }
 
     function poll() {
@@ -303,7 +303,7 @@ function logDetails(res) {
 
     _(res.details.componentSuccesses)
       .map(function(e) {
-        e.cType = _.isString(e.componentType) ?
+        e.cType = (_.isString(e.componentType) && e.componentType.length) ?
           (e.componentType + ': ') :
           '';
 

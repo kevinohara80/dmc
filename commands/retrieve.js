@@ -1,6 +1,7 @@
 var user      = require('../lib/user');
 var _         = require('lodash');
 var logger    = require('../lib/logger');
+var hl        = logger.highlight;
 var cliUtil   = require('../lib/cli-util');
 var sfClient  = require('../lib/sf-client');
 var index     = require('../lib/index');
@@ -232,7 +233,7 @@ var run = module.exports.run = function(opts, cb) {
     });
 
     promise.poller.on('poll', function(res) {
-      logger.log('retrieve status: ' + res.status);
+      logger.log('retrieve status: ' + hl(res.status));
     });
 
     return promise;

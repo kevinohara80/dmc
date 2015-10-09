@@ -291,7 +291,7 @@ function runToolingDeploy(map, client) {
 
 }
 
-function logDetails(res) {
+function logDetails(res, opts) {
   if(!res.details) return;
 
   var cType;
@@ -357,9 +357,54 @@ function logDetails(res) {
     } else {
       logger.success('test results ====>');
     }
+    // console.error(res.details.runTestResult.codeCoverage);
+    // console.error(res.details.runTestResult.codeCoverageWarnings);
     logger.list('tests run: ' + res.details.runTestResult.numTestsRun);
     logger.list('failures: ' + res.details.runTestResult.numFailures);
     logger.list('total time: ' + res.details.runTestResult.totalTime);
+
+    var cc = res.details.runTestResult.codeCoverage;
+
+    if(opts.coverage && cc && cc.length) {
+      logger.success('code coverage results ====>');
+
+      _(cc)
+        .map(function(c) {
+          var locations = c.numLocations;
+          var notCovered = c.numLocationsNotCovered;
+          var covered = locations - notCovered;
+          var coverage = ((covered / locations) * 100);
+
+          if(locations === 0) {
+            coverage = 100;
+          }
+
+          return {
+            type: c.type,
+            name: c.name,
+            locations: locations,
+            notCovered: notCovered,
+            covered: covered,
+            coverage: coverage
+          }
+        })
+        .sortBy(function(c) {
+          return c.coverage * -1;
+        })
+        .each(function(c) {
+          logger.list(c.coverage.toFixed(2) + '% => ' + c.type + ':' + c.name + ' (' + c.covered + '/' + c.locations + ')');
+        })
+        .value();
+    }
+
+    var ccw = res.details.runTestResult.codeCoverageWarnings;
+
+    if(ccw && ccw.length) {
+      logger.error('code coverage warnings ====>');
+      _.each(ccw, function(w) {
+        logger.list(w.message);
+      });
+    }
 
     _.each(res.details.runTestResult.failures, function (f) {
       logger.error(f);
@@ -367,7 +412,7 @@ function logDetails(res) {
   }
 }
 
-function runMetadataDeploy(map, client) {
+function runMetadataDeploy(map, client, opts) {
   logger.log('running metadata deploy');
 
   return new Promise(function(resolve, reject) {
@@ -391,11 +436,11 @@ function runMetadataDeploy(map, client) {
     });
 
     promise.then(function(results){
-      logDetails(results);
+      logDetails(results, opts);
       resolve();
     }).catch(function(err) {
       if(err.details) {
-        logDetails(err);
+        logDetails(err, opts);
       } else {
         logger.error(err.message);
       }
@@ -405,19 +450,6 @@ function runMetadataDeploy(map, client) {
     // iterator for adding files
     // checks for existence and adds
     function iterator(p, cb) {
-      // fs.existsAsync(p).then(function(exists) {
-      //   if(exists) {
-      //     logger.list(p);
-      //     // add the file to the zip
-      //     archive.file(p);
-      //   } else {
-      //     logger.error('missing file: ' + p);
-      //   }
-      //   return cb(null, {
-      //     file: p,
-      //     exists: exists
-      //   });
-      // });
       var exists;
 
       fs.existsAsync(p).then(function(e) {
@@ -525,7 +557,7 @@ var run = module.exports.run = function(opts, cb) {
     if(!map.requiresMetadataDeploy() && !opts.meta) {
       return runToolingDeploy(map, client);
     } else {
-      return runMetadataDeploy(map, client);
+      return runMetadataDeploy(map, client, opts);
     }
   })
 
@@ -543,6 +575,7 @@ module.exports.cli = function(program) {
   program.command('deploy [globs...]')
     .description('deploy metadata to target org')
     .option('-o, --org <org>', 'the Salesforce organization to use')
+    .option('--coverage', 'show code coverage for tests run')
     .option('--meta', 'force deploy with metadata api')
     .action(function(globs, opts) {
       opts.globs = globs;

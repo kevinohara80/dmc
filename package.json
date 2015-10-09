@@ -47,14 +47,13 @@
     "fs-extra": "^0.18.4",
     "glob": "^5.0.10",
     "handlebars": "^2.0.0",
-    "lodash": "^3.10.0",
+    "lodash": "^3.10.1",
     "minimatch": "^2.0.8",
     "nforce": "^1.2.0",
     "nforce-metadata": "^1.0.5",
     "nforce-tooling": "0.0.4",
     "node-watch": "^0.3.4",
     "open": "0.0.5",
-    "rimraf": "^2.3.2",
-    "soap": "^0.6.0"
+    "rimraf": "^2.3.2"
   }
 }

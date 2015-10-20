@@ -79,6 +79,10 @@ describe('lib/config-schema', function() {
       configSchema.getDefaultValue('colorize').should.equal(true);
     });
 
+    it('should return the default for background', function(){
+      configSchema.getDefaultValue('background').should.equal('light');
+    });
+
   });
 
   describe('#getDefaultConfig', function() {
@@ -89,6 +93,7 @@ describe('lib/config-schema', function() {
       cfg.should.have.property('api_version', 32);
       cfg.should.have.property('colorize', true);
       cfg.should.have.property('log_level', 'info');
+      cfg.should.have.property('background', 'light');
     });
 
   });

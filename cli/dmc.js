@@ -45,10 +45,10 @@ loadCommand('resources');
 // loadCommand('get');
 
 // bootstraps any necessary config items
-user.bootstrap().then(function(){
-  // preload all of the configuration files
-  return config.loadAll();
-}).then(function(){
+user.bootstrap()
+.then(config.loadAll)
+.then(config.configColors)
+.then(function(){
   // starts the program
   program.parse(process.argv);
 

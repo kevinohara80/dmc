@@ -27,7 +27,8 @@ function getFilePaths(typeGroups, oauth, client) {
       client.meta.listMetadata({
         queries: _.map(types, function(t) {
           return {
-            type: t.name
+            type: t.name,
+            folder: t.folder
           };
         })
       }).then(function(res) {

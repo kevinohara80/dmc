@@ -387,7 +387,7 @@ function logDetails(res, opts) {
             notCovered: notCovered,
             covered: covered,
             coverage: coverage
-          }
+          };
         })
         .sortBy(function(c) {
           return c.coverage * -1;
@@ -560,7 +560,7 @@ var run = module.exports.run = function(opts, cb) {
 
     logger.log('deploy mode: ' + deployMode);
 
-    if(!map.requiresMetadataDeploy() && !opts.meta && deployMode != 'metadata') {
+    if(!map.requiresMetadataDeploy() && !opts.meta && deployMode !== 'metadata') {
       logger.info('deploy api: ' + hl('tooling'));
       return runToolingDeploy(map, client);
     } else {

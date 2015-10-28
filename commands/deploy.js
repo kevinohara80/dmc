@@ -3,6 +3,7 @@ var user      = require('../lib/user');
 var cliUtil   = require('../lib/cli-util');
 var sfClient  = require('../lib/sf-client');
 var index     = require('../lib/index');
+var config    = require('../lib/config');
 var metaMap   = require('../lib/metadata-map');
 var getFiles  = require('../lib/get-files');
 var Promise   = require('bluebird');
@@ -413,7 +414,6 @@ function logDetails(res, opts) {
 }
 
 function runMetadataDeploy(map, client, opts) {
-  logger.log('running metadata deploy');
 
   return new Promise(function(resolve, reject) {
     var archive = archiver('zip');
@@ -523,6 +523,8 @@ var run = module.exports.run = function(opts, cb) {
 
   return Promise.resolve()
 
+  .then(config.loadAll)
+
   .then(function(){
     dmcignore.load().then(function(lines) {
       ignores = lines;
@@ -554,9 +556,15 @@ var run = module.exports.run = function(opts, cb) {
 
   .then(function() {
 
-    if(!map.requiresMetadataDeploy() && !opts.meta) {
+    var deployMode = config.get('deploy_mode') || 'dynamic';
+
+    logger.log('deploy mode: ' + deployMode);
+
+    if(!map.requiresMetadataDeploy() && !opts.meta && deployMode != 'metadata') {
+      logger.info('deploy api: ' + hl('tooling'));
       return runToolingDeploy(map, client);
     } else {
+      logger.info('deploy api: ' + hl('metadata'));
       return runMetadataDeploy(map, client, opts);
     }
   })

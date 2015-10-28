@@ -158,14 +158,13 @@ function copyFiles(replace) {
 }
 
 function removeTmpDir() {
-  return new Promise(function(resolve, reject) {
-    fs.existsAsync(paths.dir.tmp).then(function(exists) {
+  return fs.existsAsync(paths.dir.tmp)
+    .then(function(exists) {
       if(exists) {
         logger.log('removing tmp directory');
         return fs.removeAsync(paths.dir.tmp);
       }
     });
-  });
 }
 
 var run = module.exports.run = function(opts, cb) {

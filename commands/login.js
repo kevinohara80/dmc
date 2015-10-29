@@ -1,4 +1,5 @@
 var logger     = require('../lib/logger');
+var Promise    = require('bluebird');
 var sfclient   = require('../lib/sf-client');
 var authServer = require('../lib/auth-server');
 var index      = require('../commands/index');
@@ -6,54 +7,75 @@ var sfClient   = require('../lib/sf-client');
 var cliUtil    = require('../lib/cli-util');
 var open       = require('open');
 var user       = require('../lib/user');
+var resolve    = require('../lib/resolve');
 
-var run = module.exports.run = function(opts) {
+var run = module.exports.run = function(opts, cb) {
 
-  var clientOpts = {};
+  return resolve(cb, function(){
 
-  if(opts.test) {
-    clientOpts.environment = 'sandbox';
-  } else if(opts.uri) {
-    clientOpts.loginUri = opts.uri;
-  }
+    var clientOpts = {};
 
-  sfClient.getClient(clientOpts).then(function(client) {
+    if(opts.test) {
+      clientOpts.environment = 'sandbox';
+    } else if(opts.uri) {
+      clientOpts.loginUri = opts.uri;
+    }
 
-    var authUri = client.getAuthUri({ responseType: 'token' });
+    return sfClient.getClient(clientOpts)
 
-    logger.log('login starts...');
+    .then(function(client) {
 
-    authServer.on('credentials', function(creds) {
-      logger.log('received credentials');
-      logger.log('shutting down server');
+      return new Promise(function(resolve, reject) {
 
-      authServer.close();
-      
-      creds.nick        = opts.org;
-      creds.org         = opts.org;
-      creds.environment = clientOpts.environment;
-      creds.loginUri    = opts.uri;
+        var authUri = client.getAuthUri({ responseType: 'token' });
 
-      logger.log('saving credentials for ' + opts.org);
-      user.saveCredential(opts.org, creds).then(function(){
-        return index.run({ org: opts.org, oauth: creds}, function(err, res) {
-          if(err) {
-            logger.error('unable to save index');
-            logger.done(false);
-          } else {
-            logger.done();
-          }
+        logger.log('login starts...');
+
+        authServer.on('credentials', function(creds) {
+          logger.log('received credentials');
+          logger.log('shutting down server');
+
+          authServer.close();
+
+          creds.nick        = opts.org;
+          creds.org         = opts.org;
+          creds.environment = clientOpts.environment;
+          creds.loginUri    = opts.uri;
+
+          logger.log('saving credentials for ' + opts.org);
+
+          user.saveCredential(opts.org, creds)
+
+          .then(function(){
+            return index.run({ org: opts.org, oauth: creds}, function(err, res) {
+              if(err) {
+                logger.error('unable to save index');
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
+          });
+        })
+
+        .then(function(){
+          logger.log('login complete');
         });
+
+        authServer.listen(3835, function(err){
+          if(err) {
+            return reject(err);
+          }
+          logger.log('auth server started');
+          logger.log('redirect to the following uri');
+          logger.log(authUri);
+          open(authUri);
+        });
+
       });
-      //logger.done();
+
     });
 
-    authServer.listen(3835, function(){
-      logger.log('auth server started');
-      logger.log('redirect to the following uri');
-      logger.log(authUri);
-      open(authUri);
-    });
   });
 
 };

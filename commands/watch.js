@@ -15,7 +15,7 @@ var globOpts = {
   nomount: true
 };
 
-var run = module.exports.run = function(opts, cb) {
+var run = module.exports.run = function(opts) {
 
   if(!opts.globs || !opts.globs.length) {
     opts.globs = [ 'src/**/*' ];
@@ -25,7 +25,9 @@ var run = module.exports.run = function(opts, cb) {
     return glob(file, globOpts).then(function(files) {
       return allFiles.concat(files);
     });
-  }, []).then(function(allFiles) {
+  }, [])
+
+  .then(function(allFiles) {
     logger.log('now watching ' + hl(allFiles.length) + ' files');
     watch(_.uniq(allFiles), function(f) {
       logger.log('file changed: ' + f);

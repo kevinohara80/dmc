@@ -1,24 +1,33 @@
 var logger  = require('../lib/logger');
 var user    = require('../lib/user');
 var cliUtil = require('../lib/cli-util.js');
+var resolve = require('../lib/resolve');
 
 var run = module.exports.run = function(opts, cb) {
-  user.listCredentials().then(function(creds) {
-    if(!creds || creds.length === 0) {
-      logger.log('no logins found!');
-      return cb();
-    }
 
-    logger.log('listing all logins:');
+  return resolve(cb, function() {
 
-    creds.forEach(function(c) {
-      logger.list(c.name + ' - ' + c.instance_url);
+    return Promise.resolve()
+
+    .then(user.listCredentials)
+
+    .then(function(creds) {
+      if(!creds || creds.length === 0) {
+        logger.log('no logins found!');
+        return [];
+      }
+
+      logger.log('listing all logins:');
+
+      creds.forEach(function(c) {
+        logger.list(c.name + ' - ' + c.instance_url);
+      });
+
+      return creds;
     });
-    
-    cb(null, creds);
-  }).catch(function(err) {
-    cb(err);
+
   });
+  
 };
 
 var cli = module.exports.cli = function(program) {

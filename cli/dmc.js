@@ -42,7 +42,7 @@ loadCommand('watch');
 // loadCommand('destroy');
 // loadCommand('anon');
 loadCommand('resources');
-// loadCommand('get');
+loadCommand('get');
 
 // bootstraps any necessary config items
 user.bootstrap()

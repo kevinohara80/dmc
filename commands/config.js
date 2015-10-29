@@ -1,44 +1,50 @@
-var user     = require('../lib/user');
-var logger   = require('../lib/logger');
-var cliUtil  = require('../lib/cli-util');
-var config   = require('../lib/config');
-var _        = require('lodash');
+var user    = require('../lib/user');
+var logger  = require('../lib/logger');
+var cliUtil = require('../lib/cli-util');
+var config  = require('../lib/config');
+var _       = require('lodash');
+var resolve = require('../lib/resolve');
 
 var run = module.exports.run = function(opts, cb) {
 
-  config.loadAll().then(function() {
+  return resolve(cb, function(){
 
-    var l = config.local();
-    var g = config.global();
+    return config.loadAll()
 
-    var keys = [];
+    .then(function() {
 
-    if(!opts.global && !opts.local) {
-      logger.log('resolving config variables');
-      keys = _.keys(l.getData()).concat(_.keys(g.getData()));
-    } else if(opts.global) {
-      logger.log('showing global variables');
-      keys = _.keys(g.getData());
-    } else {
-      logger.log('showing local variables');
-      keys = _.keys(l.getData());
-    }
+      var l = config.local();
+      var g = config.global();
 
-    _(keys)
-      .uniq()
-      .sort()
-      .each(function(k) {
-        if(!_.isUndefined(l.get(k)) && !_.isNull(l.get(k)) && (!opts.global)) {
-          logger.list(k + ': ' + l.get(k) + ' (local)');
-        } else {
-          logger.list(k + ': ' + g.get(k) + ' (global)');
-        }
-      })
-      .value();
+      var keys = [];
 
-  }).catch(function(err) {
-    cb(err);
+      if(!opts.global && !opts.local) {
+        logger.log('resolving config variables');
+        keys = _.keys(l.getData()).concat(_.keys(g.getData()));
+      } else if(opts.global) {
+        logger.log('showing global variables');
+        keys = _.keys(g.getData());
+      } else {
+        logger.log('showing local variables');
+        keys = _.keys(l.getData());
+      }
+
+      _(keys)
+        .uniq()
+        .sort()
+        .each(function(k) {
+          if(!_.isUndefined(l.get(k)) && !_.isNull(l.get(k)) && (!opts.global)) {
+            logger.list(k + ': ' + l.get(k) + ' (local)');
+          } else {
+            logger.list(k + ': ' + g.get(k) + ' (global)');
+          }
+        })
+        .value();
+
+    });
+
   });
+  
 };
 
 

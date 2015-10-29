@@ -6,21 +6,30 @@ var paths    = require('../lib/paths');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
 var fs       = require('../lib/fs');
+var resolve  = require('../lib/resolve');
 
 var run = module.exports.run = function(opts, cb) {
-  logger.log('indexing org: ' + opts.org);
 
-  var idx = index.init(opts.org, opts.oauth);
+  return resolve(cb, function() {
 
-  logger.log('fetching index data');
-  idx.fetch().then(function() {
-    logger.log('saving index');
-    return idx.save();
-  }).then(function() {
-    cb();
-  }).catch(function(err) {
-    cb(err);
+    var idx;
+
+    return Promise.resolve()
+
+    .then(function() {
+      logger.log('indexing org: ' + opts.org);
+      idx = index.init(opts.org, opts.oauth);
+      return idx.fetch();
+    })
+
+    .then(function() {
+      logger.log('indexing complete');
+      logger.log('saving index');
+      return idx.save();
+    });
+
   });
+
 };
 
 module.exports.cli = function(program) {

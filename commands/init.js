@@ -1,16 +1,24 @@
-var config   = require('../lib/config');
-var cliUtil  = require('../lib/cli-util');
-var prompt   = require('../lib/prompt');
-var logger   = require('../lib/logger');
+var config  = require('../lib/config');
+var Promise = require('bluebird');
+var cliUtil = require('../lib/cli-util');
+var prompt  = require('../lib/prompt');
+var logger  = require('../lib/logger');
+var resolve = require('../lib/resolve');
 
 var run = module.exports.run = function(opts, cb) {
-  logger.log('Initializing local dmc project config');
-  logger.log('writing ' + process.cwd() + '/dmc_config.json');
-  config.local().init().then(function(){
-    cb();
-  }).catch(function(err) {
-    cb(err);
+
+  return resolve(cb, function(){
+
+    return Promise.resolve()
+
+    .then(function(){
+      logger.log('Initializing local dmc project config');
+      logger.log('writing ' + process.cwd() + '/dmc_config.json');
+      return config.local().init();
+    });
+
   });
+
 };
 
 module.exports.cli = function(program) {

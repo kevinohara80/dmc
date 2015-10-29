@@ -15,6 +15,7 @@ var glob      = require('glob');
 var AdmZip    = require('adm-zip');
 var rimraf    = require('rimraf');
 var dmcignore = require('../lib/dmcignore');
+var resolve   = require('../lib/resolve');
 
 var rimrafAsync = Promise.promisify(rimraf);
 
@@ -169,103 +170,102 @@ function removeTmpDir() {
 
 var run = module.exports.run = function(opts, cb) {
 
-  var client;
+  return resolve(cb, function(){
 
-  var map = metaMap.createMap({
-    oauth: opts.oauth,
-    org: opts.org
-  });
+    var client;
 
-  var ignores = null;
-
-  return Promise.resolve()
-
-  .then(function() {
-    dmcignore.load().then(function(lines) {
-      ignores = lines;
+    var map = metaMap.createMap({
+      oauth: opts.oauth,
+      org: opts.org
     });
-  })
 
-  .then(function() {
-    return sfClient.getClient(opts.oauth);
-  })
+    var ignores = null;
 
-  .then(function(sfdcClient){
-    client = sfdcClient;
-    return map.autoLoad();
-  })
+    return Promise.resolve()
 
-  .then(function() {
-    var typeMatches = map.index.getTypesFromGlobs(opts.globs);
-    // log out the matched directories
-    logger.log('matching types');
-    _.each(typeMatches, function(tm) {
-      logger.list('matched type: ' + tm.name);
-    });
-    // group the metadata into groups of 3 since that's the limit
-    // in a single listMetadata call
-    var grouped = _.chunk(typeMatches, 3);
-    return getFilePaths(grouped, opts.oauth, client);
-  })
+    .then(function() {
+      dmcignore.load().then(function(lines) {
+        ignores = lines;
+      });
+    })
 
-  .then(function(fpaths){
-    if(!fpaths || fpaths.length < 1) {
-      throw new Error('no files found for retrieve');
-    }
-    return filterOnGlobs(fpaths, ignores, opts.globs);
-  })
+    .then(function() {
+      return sfClient.getClient(opts.oauth);
+    })
 
-  .then(function(filteredPaths) {
-    if(!filteredPaths || filteredPaths.length < 1) {
-      throw new Error('no files found for retrieve');
-    }
-    map.addFiles(filteredPaths);
+    .then(function(sfdcClient){
+      client = sfdcClient;
+      return map.autoLoad();
+    })
 
-    var apiVersion = client.apiVersion.replace('v', '');
+    .then(function() {
+      var typeMatches = map.index.getTypesFromGlobs(opts.globs);
+      // log out the matched directories
+      logger.log('matching types');
+      _.each(typeMatches, function(tm) {
+        logger.list('matched type: ' + tm.name);
+      });
+      // group the metadata into groups of 3 since that's the limit
+      // in a single listMetadata call
+      var grouped = _.chunk(typeMatches, 3);
+      return getFilePaths(grouped, opts.oauth, client);
+    })
 
-    var promise = client.meta.retrieveAndPoll({
-      apiVersion: apiVersion,
-      unpackaged: {
-        version: apiVersion,
-        types: map.createTypesArray()
+    .then(function(fpaths){
+      if(!fpaths || fpaths.length < 1) {
+        throw new Error('no files found for retrieve');
       }
+      return filterOnGlobs(fpaths, ignores, opts.globs);
+    })
+
+    .then(function(filteredPaths) {
+      if(!filteredPaths || filteredPaths.length < 1) {
+        throw new Error('no files found for retrieve');
+      }
+      map.addFiles(filteredPaths);
+
+      var apiVersion = client.apiVersion.replace('v', '');
+
+      var promise = client.meta.retrieveAndPoll({
+        apiVersion: apiVersion,
+        unpackaged: {
+          version: apiVersion,
+          types: map.createTypesArray()
+        }
+      });
+
+      promise.poller.on('poll', function(res) {
+        logger.log('retrieve status: ' + hl(res.status));
+      });
+
+      return promise;
+    })
+
+    .then(function(res){
+      return unzipToTmp(res.zipFile);
+    })
+
+    .then(function(){
+      if(opts.replace) {
+        logger.log('clearing src dir');
+        return clearSrcDir();
+      }
+    })
+
+    .then(function(){
+      logger.log('merging files to src');
+      return copyFiles(opts.replace);
+    })
+
+    .then(function() {
+      logger.log('cleaning up temporary files');
+      return removeTmpDir();
+    })
+
+    .then(function() {
+      logger.success('retrieve successful');
     });
 
-    promise.poller.on('poll', function(res) {
-      logger.log('retrieve status: ' + hl(res.status));
-    });
-
-    return promise;
-  })
-
-  .then(function(res){
-    return unzipToTmp(res.zipFile);
-  })
-
-  .then(function(){
-    if(opts.replace) {
-      logger.log('clearing src dir');
-      return clearSrcDir();
-    }
-  })
-
-  .then(function(){
-    logger.log('merging files to src');
-    return copyFiles(opts.replace);
-  })
-
-  .then(function() {
-    logger.log('cleaning up temporary files');
-    return removeTmpDir();
-  })
-
-  .then(function() {
-    logger.success('retrieve successful');
-    cb();
-  })
-
-  .catch(function(err) {
-    cb(err);
   });
 
 };

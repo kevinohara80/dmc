@@ -1,8 +1,9 @@
-var user       = require('../lib/user');
-var logger     = require('../lib/logger');
-var cliUtil    = require('../lib/cli-util');
-var sfClient   = require('../lib/sf-client');
-var _          = require('lodash');
+var user     = require('../lib/user');
+var logger   = require('../lib/logger');
+var cliUtil  = require('../lib/cli-util');
+var sfClient = require('../lib/sf-client');
+var _        = require('lodash');
+var resolve  = require('../lib/resolve');
 
 function flattenAndFilter(obj, fields, pre) {
   _.forIn(obj, function(v, k) {
@@ -16,16 +17,21 @@ function flattenAndFilter(obj, fields, pre) {
 }
 
 var run = module.exports.run = function(opts, cb) {
-  var oauth = opts.oauth;
 
-  sfClient.getClient(opts.oauth).then(function(client) {
-    return client.getIdentity( { oauth: opts.oauth });
-  }).then(function(res) {
-    flattenAndFilter(res, opts.fields);
-    cb(null);
-  }).catch(function(err) {
-    cb(err);
+  return resolve(cb, function() {
+
+    return sfClient.getClient(opts.oauth)
+
+    .then(function(client) {
+      return client.getIdentity({ oauth: opts.oauth });
+    })
+
+    .then(function(res){
+      flattenAndFilter(res, opts.fields);
+    });
+
   });
+
 };
 
 module.exports.cli = function(program) {

@@ -2,21 +2,26 @@ var user     = require('../lib/user');
 var logger   = require('../lib/logger');
 var cliUtil  = require('../lib/cli-util');
 var sfClient = require('../lib/sf-client');
+var resolve  = require('../lib/resolve');
 
-var run = module.exports.run = function(org, url, opts) {
-  var orgCreds = user.getCredential(org);
-  //console.log(orgCreds);
-  sfClient.getUrl({ oauth: orgCreds, url: url }, function(err, res) {
-    if(err) {
-      logger.error(err.message);
-      logger.done(false);
-      process.exit(1);
-    } else {
+var run = module.exports.run = function(opts, cb) {
+
+  return resolve(cb, function(){
+
+    return sfClient.getClient(opts.oauth)
+
+    .then(function(client) {
+      return client.getUrl({ oauth: opts.oauth, url: opts.url });
+    })
+
+    .then(function(res) {
       logger.log('resp:');
       console.log(res);
-      logger.done();
-    }
+      return res;
+    });
+
   });
+
 };
 
 module.exports.cli = function(program) {

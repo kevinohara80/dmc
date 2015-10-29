@@ -1,22 +1,29 @@
-var config   = require('../lib/config');
-var logger   = require('../lib/logger');
-var cliUtil  = require('../lib/cli-util');
-var user     = require('../lib/user');
-var _        = require('lodash');
+var config  = require('../lib/config');
+var logger  = require('../lib/logger');
+var cliUtil = require('../lib/cli-util');
+var user    = require('../lib/user');
+var _       = require('lodash');
+var resolve = require('../lib/resolve');
 
 var run = module.exports.run = function(opts, cb) {
 
-  var cfg;
+  return resolve(cb, function(){
 
-  if(opts.global) {
-    logger.log('setting global default org');
-    cfg = config.global();
-  } else {
-    logger.log('setting local default org');
-    cfg = config.local();
-  }
+    var cfg;
 
-  user.hasCredential(opts.org)
+    if(opts.global) {
+      logger.log('setting global default org');
+      cfg = config.global();
+    } else {
+      logger.log('setting local default org');
+      cfg = config.local();
+    }
+
+    return Promise.resolve()
+
+    .then(function() {
+      return user.hasCredential(opts.org);
+    })
 
     // check that the org has a login
     .then(function(exists) {
@@ -48,12 +55,9 @@ var run = module.exports.run = function(opts, cb) {
     // finsh with a log
     .then(function(){
       logger.success('configuration saved');
-      cb();
-    })
-
-    .catch(function(err) {
-      cb(err);
     });
+
+  });
 };
 
 

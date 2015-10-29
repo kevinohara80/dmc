@@ -13,6 +13,7 @@ var _         = require('lodash');
 var archiver  = require('archiver');
 var logger    = require('../lib/logger');
 var dmcignore = require('../lib/dmcignore');
+var resolve   = require('../lib/resolve');
 var hl        = logger.highlight;
 
 function createStubFiles(map, client) {
@@ -507,76 +508,72 @@ function runMetadataDeploy(map, client, opts) {
 
 var run = module.exports.run = function(opts, cb) {
 
-  var containerId;
-  var client;
-  var oauth = opts.oauth;
-  var globs = (opts.globs && opts.globs.length > 0) ?
-    opts.globs:
-    ['src/**/*'];
+  return resolve(cb, function(){
 
-  var map = metaMap.createMap({
-    oauth: opts.oauth,
-    org:   opts.org
-  });
+    var containerId;
+    var client;
+    var oauth = opts.oauth;
+    var globs = (opts.globs && opts.globs.length > 0) ?
+      opts.globs:
+      ['src/**/*'];
 
-  var ignores = null;
-
-  return Promise.resolve()
-
-  .then(config.loadAll)
-
-  .then(function(){
-    dmcignore.load().then(function(lines) {
-      ignores = lines;
+    var map = metaMap.createMap({
+      oauth: opts.oauth,
+      org:   opts.org
     });
-  })
 
-  .then(function(){
-    return sfClient.getClient(opts.oauth);
-  })
+    var ignores = null;
 
-  // load the index for the org
-  .then(function(sfdcClient) {
-    client = sfdcClient;
-    return map.autoLoad();
-  })
+    return Promise.resolve()
 
-  // search src/ for file matches
-  .then(function() {
-    logger.log('searching for local metadata');
-    return getFiles({ globs: globs, ignores: ignores })
-      .then(function(files) {
-        if(!files || files.length < 1) {
-          throw new Error('no files for deployment found');
-        }
-        logger.log('deploying ' + hl(files.length) + ' metadata files');
-        map.addFiles(files);
+    .then(config.loadAll)
+
+    .then(function(){
+      dmcignore.load().then(function(lines) {
+        ignores = lines;
       });
-  })
+    })
 
-  .then(function() {
+    .then(function(){
+      return sfClient.getClient(opts.oauth);
+    })
 
-    var deployMode = config.get('deploy_mode') || 'dynamic';
+    // load the index for the org
+    .then(function(sfdcClient) {
+      client = sfdcClient;
+      return map.autoLoad();
+    })
 
-    logger.log('deploy mode: ' + deployMode);
+    // search src/ for file matches
+    .then(function() {
+      logger.log('searching for local metadata');
+      return getFiles({ globs: globs, ignores: ignores })
+        .then(function(files) {
+          if(!files || files.length < 1) {
+            throw new Error('no files for deployment found');
+          }
+          logger.log('deploying ' + hl(files.length) + ' metadata files');
+          map.addFiles(files);
+        });
+    })
 
-    if(!map.requiresMetadataDeploy() && !opts.meta && deployMode !== 'metadata') {
-      logger.info('deploy api: ' + hl('tooling'));
-      return runToolingDeploy(map, client);
-    } else {
-      logger.info('deploy api: ' + hl('metadata'));
-      return runMetadataDeploy(map, client, opts);
-    }
-  })
+    .then(function() {
 
-  .then(function(){
-    cb();
-  })
+      var deployMode = config.get('deploy_mode') || 'dynamic';
 
-  .catch(function(err) {
-    cb(err);
+      logger.log('deploy mode: ' + deployMode);
+
+      if(!map.requiresMetadataDeploy() && !opts.meta && deployMode !== 'metadata') {
+        logger.info('deploy api: ' + hl('tooling'));
+        return runToolingDeploy(map, client);
+      } else {
+        logger.info('deploy api: ' + hl('metadata'));
+        return runMetadataDeploy(map, client, opts);
+      }
+    });
+
   });
-
+  
 };
 
 module.exports.cli = function(program) {

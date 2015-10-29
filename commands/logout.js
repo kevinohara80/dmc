@@ -6,64 +6,78 @@ var cliUtil  = require('../lib/cli-util');
 var config   = require('../lib/config');
 var index    = require('../lib/index');
 var async    = require('async');
+var resolve  = require('../lib/resolve');
 
 var run = module.exports.run = function(opts, cb) {
 
-  function revokeToken(tokenType) {
-    logger.log('revoking ' + tokenType + ' token');
+  return resolve(cb, function(){
 
-    return sfClient.getClient(opts.oauth)
-      .then(function(client) {
-        return client.revokeToken({
-          token: opts.oauth[tokenType + '_token']
+    function revokeToken(tokenType) {
+      logger.log('revoking ' + tokenType + ' token');
+
+      return sfClient.getClient(opts.oauth)
+        .then(function(client) {
+          return client.revokeToken({
+            token: opts.oauth[tokenType + '_token']
+          });
+        })
+        .then(function(){
+          logger.log(tokenType + ' token revoked');
+        })
+        .catch(function(err) {
+          logger.log(tokenType + ' token not revoked: invalid');
         });
-      })
-      .then(function(){
-        logger.log(tokenType + ' token revoked');
-      })
-      .catch(function(err) {
-        logger.log(tokenType + ' token not revoked: invalid');
-      });
-  }
-
-  function deleteCredential() {
-    logger.log('removing credentials');
-    return user.deleteCredential(opts.org);
-  }
-
-  function unsetDefaultOrg(cfgType) {
-    var cfg = config[cfgType]();
-    if(cfg.exists() && cfg.get('defaultOrg') === opts.org) {
-      logger.log('unsetting ' + cfgType + ' defaultOrg config');
-      cfg.set('defaultOrg', null);
-      return cfg.save();
     }
-  }
 
-  function deleteIndex() {
-    var idx = index.init(opts.org, opts.oauth);
-    logger.log('cleaning up index cache');
-    return idx.destroy();
-  }
+    function deleteCredential() {
+      logger.log('removing credentials');
+      return user.deleteCredential(opts.org);
+    }
 
-  return Promise.resolve().then(function() {
-    return Promise.all([
-      revokeToken('access'),
-      revokeToken('refresh')
-    ]);
-  }).then(function(){
-    return config.loadAll();
-  }).then(function(){
-    return Promise.all([
-      unsetDefaultOrg('local'),
-      unsetDefaultOrg('global')
-    ]);
+    function unsetDefaultOrg(cfgType) {
+      var cfg = config[cfgType]();
+      if(cfg.exists() && cfg.get('defaultOrg') === opts.org) {
+        logger.log('unsetting ' + cfgType + ' defaultOrg config');
+        cfg.set('defaultOrg', null);
+        return cfg.save();
+      }
+    }
 
-  }).then(function() {
-    return deleteIndex();
-  }).then(function(){
-    return deleteCredential();
-  }).then(cb).catch(cb);
+    function deleteIndex() {
+      var idx = index.init(opts.org, opts.oauth);
+      logger.log('cleaning up index cache');
+      return idx.destroy();
+    }
+
+    return Promise.resolve()
+
+    .then(function() {
+      return Promise.all([
+        revokeToken('access'),
+        revokeToken('refresh')
+      ]);
+    })
+
+    .then(function(){
+      return config.loadAll();
+    })
+
+    .then(function(){
+      return Promise.all([
+        unsetDefaultOrg('local'),
+        unsetDefaultOrg('global')
+      ]);
+    })
+
+    .then(function() {
+      return deleteIndex();
+    })
+
+    .then(function(){
+      return deleteCredential();
+    });
+
+  });
 
 };
 

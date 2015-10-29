@@ -40,7 +40,7 @@ loadCommand('deploy');
 loadCommand('retrieve');
 loadCommand('watch');
 // loadCommand('destroy');
-// loadCommand('anon');
+loadCommand('anon');
 loadCommand('resources');
 loadCommand('get');
 

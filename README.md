@@ -34,20 +34,22 @@ usage information.
 
   Commands:
 
-    init                             initialize a project for dmc
-    config [options]                 show the resolved dmc configuration
-    config:set [options] [items...]  set configuration variables
-    logins                           list your salesforce logins
-    login [options] <org>            login to a Salesforce organization
-    logout [org]                     logout of a Salesforce organization
-    use [options] <org>              quickly set your default org in your configuration
-    index [options] [org]            indexes metadata for a target org
-    open [org]                       open the target org in a browser window
-    identity [options]               show the identity for the specified org
-    deploy [options] [globs...]      deploy metadata to target org
-    retrieve [options] [globs...]    retrieve metadata from target org
-    watch [options] [globs...]       watch files and deploy metadata to target org
-    resources [options]              list all of the available api resources
+  init                             initialize a project for dmc
+  config [options]                 show the resolved dmc configuration
+  config:set [options] [items...]  set configuration variables
+  logins                           list your salesforce logins
+  login [options] <org>            login to a Salesforce organization
+  logout [org]                     logout of a Salesforce organization
+  use [options] <org>              quickly set your default org in your configuration
+  index [options] [org]            indexes metadata for a target org
+  open [org]                       open the target org in a browser window
+  identity [options]               show the identity for the specified org
+  deploy [options] [globs...]      deploy metadata to target org
+  retrieve [options] [globs...]    retrieve metadata from target org
+  watch [options] [globs...]       watch files and deploy metadata to target org
+  anon [options] [code]            execute anonymous apex [code]
+  resources [options]              list all of the available api resources
+  get [options] <url>              get a REST API url
 
   Options:
 

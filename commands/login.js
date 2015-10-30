@@ -56,10 +56,6 @@ var run = module.exports.run = function(opts, cb) {
               }
             });
           });
-        })
-
-        .then(function(){
-          logger.log('login complete');
         });
 
         authServer.listen(3835, function(err){

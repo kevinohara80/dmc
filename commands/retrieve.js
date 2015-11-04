@@ -28,8 +28,6 @@ function getFilePaths(typeGroups, opts, client) {
 
   return new Promise(function(resolve, reject) {
 
-    var run = true;
-
     var iterator = function(types, cb) {
 
       types = _.map(types, function(t) {

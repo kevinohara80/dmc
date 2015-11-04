@@ -28,14 +28,49 @@ function getFilePaths(typeGroups, opts, client) {
 
   return new Promise(function(resolve, reject) {
 
+    var run = true;
+
     var iterator = function(types, cb) {
+
+      types = _.map(types, function(t) {
+        console.log(t);
+        // when searching documents but not specifying a subfolder
+        // we need to request a listMetadata on DocumentFolder 
+        // first and recursively call the iterator to return the 
+        // documents in the subfolder
+        if(t.name === 'Document' && !t.subFolder) {
+          return { name: 'DocumentFolder' }
+        }
+        return t;
+      });
+
       client.meta.listMetadata({
         queries: _.map(types, function(t) {
           return {
-            type: t.name
+            type: t.name,
+            folder: t.subFolder
           };
         })
-      }).then(function(res) {
+      })
+
+      .then(function(res) {
+        var promises = [];
+
+        _(res)
+          .flattenDeep()
+          .each(function(md) {
+            if(md.type === 'DocumentFolder') {
+              promises.push(iteratorAsync([{ name: 'Document', subFolder: md.fullName } ]));
+            } else {
+              promises.push(Promise.resolve(md));
+            }
+          })
+          .value();
+
+        return Promise.all(promises);
+      })
+
+      .then(function(res) {
         if(!res || !res.length) {
           return cb(null, null);
         }
@@ -56,8 +91,11 @@ function getFilePaths(typeGroups, opts, client) {
 
             return _.isUndefined(r.namespacePrefix) || _.isNull(r.namespacePrefix);
           })
+          .compact()
           .map(function(md) {
-            console.log(md.fileName + '  ----->  ' + md.namespacePrefix);
+            // this is already turned into a string by recursion
+            if(_.isString(md)) return md;
+
             // sometimes salesforce responds with a weird
             // filename like Workflow/My_Object.object when
             // all other workflows fall into a directory like
@@ -76,6 +114,8 @@ function getFilePaths(typeGroups, opts, client) {
         cb(err);
       });
     };
+
+    var iteratorAsync = Promise.promisify(iterator);
 
     async.mapLimit(typeGroups, 5, iterator, function(err, res) {
       if(err) return reject(err);

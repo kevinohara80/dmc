@@ -31,7 +31,6 @@ function getFilePaths(typeGroups, opts, client) {
     var iterator = function(types, cb) {
 
       types = _.map(types, function(t) {
-        console.log(t);
         // when searching documents but not specifying a subfolder
         // we need to request a listMetadata on DocumentFolder 
         // first and recursively call the iterator to return the 

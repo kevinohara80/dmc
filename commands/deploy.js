@@ -442,8 +442,12 @@ function runMetadataDeploy(map, client, opts) {
     }).catch(function(err) {
       if(err.details) {
         logDetails(err, opts);
-      } else {
+      } 
+      if(err.message) {
         logger.error(err.message);
+      }
+      if(err.errorMessage) {
+        logger.error(err.errorMessage);
       }
       reject(new Error('metatadata api deployment failed'));
     });

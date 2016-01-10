@@ -199,17 +199,23 @@ function deployContainer(containerId, client) {
           logger.success('deployment successful');
           return resolve(resp);
         } else if(resp.State === 'Failed') {
-          var msg = resp.ErrorMsg || 'unknown error occurred';
-          logger.error(msg);
-          _.each(resp.CompilerErrors, function(e) {
-            logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
-            logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
-          });
+          if(resp.ErrorMsg) logger.error(resp.ErrorMsg);
+
+          if(resp.CompilerErrors) {
+            _.each(resp.CompilerErrors, function(e) {
+              logger.error('=> ' + e.extent[0] + ': ' + e.name[0]);
+              logger.error('   Line ' + e.line[0] + ' - ' + e.problem[0]);
+            });
+          }
+
+          if(resp.DeployDetails) {
+            logDetails(resp.DeployDetails);
+          }
+          
           return reject(new Error('Compiler Errors'));
         } else if(resp.State === 'Errored') {
-          logger.error('Compile error:');
-          logger.error(res.ErrorMsg);
-          return reject(new Error(res.ErrorMsg));
+          if(resp.ErrorMsg) logger.error(res.ErrorMsg);
+          return reject(new Error(res.ErrorMsg || 'an unknown error occcurred'));
         } else {
           setTimeout(function() {
             poll();
@@ -293,17 +299,17 @@ function runToolingDeploy(map, client) {
 
 }
 
-function logDetails(res, opts) {
-  if(!res.details) return;
+function logDetails(details, opts) {
+  if(!details) return;
 
   var cType;
   var method;
 
-  if(res.details.componentSuccesses) {
+  if(details.componentSuccesses) {
 
-    logger.success('component successes [' + res.details.componentSuccesses.length + '] ====>');
+    logger.success('component successes [' + details.componentSuccesses.length + '] ====>');
 
-    _(res.details.componentSuccesses)
+    _(details.componentSuccesses)
       .map(function(e) {
         e.cType = (_.isString(e.componentType) && e.componentType.length) ?
           (e.componentType + ': ') :
@@ -326,10 +332,10 @@ function logDetails(res, opts) {
       .value();
   }
 
-  if(res.details.componentFailures) {
-    logger.error('component failures [' + res.details.componentFailures.length + '] ====>');
+  if(details.componentFailures) {
+    logger.error('component failures [' + details.componentFailures.length + '] ====>');
 
-    _(res.details.componentFailures)
+    _(details.componentFailures)
       .map(function(e) {
         e.cType = _.isString(e.componentType) ?
           (e.componentType + ': ') :
@@ -353,19 +359,19 @@ function logDetails(res, opts) {
       .value();
   }
 
-  if(res.details.runTestResult) {
-    if(res.details.runTestResult.numFailures) {
+  if(details.runTestResult) {
+    if(details.runTestResult.numFailures) {
       logger.error('test results ====>');
     } else {
       logger.success('test results ====>');
     }
-    // console.error(res.details.runTestResult.codeCoverage);
-    // console.error(res.details.runTestResult.codeCoverageWarnings);
-    logger.list('tests run: ' + res.details.runTestResult.numTestsRun);
-    logger.list('failures: ' + res.details.runTestResult.numFailures);
-    logger.list('total time: ' + res.details.runTestResult.totalTime);
+    // console.error(details.runTestResult.codeCoverage);
+    // console.error(details.runTestResult.codeCoverageWarnings);
+    logger.list('tests run: ' + details.runTestResult.numTestsRun);
+    logger.list('failures: ' + details.runTestResult.numFailures);
+    logger.list('total time: ' + details.runTestResult.totalTime);
 
-    var cc = res.details.runTestResult.codeCoverage;
+    var cc = details.runTestResult.codeCoverage;
 
     if(opts.coverage && cc && cc.length) {
       logger.success('code coverage results ====>');
@@ -399,7 +405,7 @@ function logDetails(res, opts) {
         .value();
     }
 
-    var ccw = res.details.runTestResult.codeCoverageWarnings;
+    var ccw = details.runTestResult.codeCoverageWarnings;
 
     if(ccw && ccw.length) {
       logger.error('code coverage warnings ====>');
@@ -408,7 +414,7 @@ function logDetails(res, opts) {
       });
     }
 
-    _.each(res.details.runTestResult.failures, function (f) {
+    _.each(details.runTestResult.failures, function (f) {
       logger.error(f);
     });
   }
@@ -437,11 +443,11 @@ function runMetadataDeploy(map, client, opts) {
     });
 
     promise.then(function(results){
-      logDetails(results, opts);
+      logDetails(results.details, opts);
       resolve();
     }).catch(function(err) {
       if(err.details) {
-        logDetails(err, opts);
+        logDetails(err.details, opts);
       } 
       if(err.message) {
         logger.error(err.message);

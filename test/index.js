@@ -267,6 +267,20 @@ describe('lib/index.js', function() {
       _.pluck(types, 'name').should.containEql('ApexClass');
     });
 
+    it('should match reports on subfolder', function() {
+      var types = idx.getTypesFromGlobs('src/reports/My_Folder/*');
+      types.should.be.an.Array;
+      types.length.should.equal(1);
+      _.pluck(types, 'name').should.containEql('Report');
+    });
+
+    it('should include folder name when matching reports', function() {
+      var types = idx.getTypesFromGlobs('src/reports/My_Folder/*');
+      types.should.be.an.Array;
+      types.length.should.equal(1);
+      _.pluck(types, 'folder').should.containEql('My_Folder');
+    });
+
     it('should match on globstar all', function(){
       var types = idx.getTypesFromGlobs('**/*');
       types.should.be.an.Array;

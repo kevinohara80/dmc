@@ -9,78 +9,131 @@ var open       = require('open');
 var user       = require('../lib/user');
 var resolve    = require('../lib/resolve');
 
-var run = module.exports.run = function(opts, cb) {
+function createClientOpts(opts) {
+  var clientOpts = {};
+  if(opts.test) {
+    clientOpts.environment = 'sandbox';
+  } else if(opts.uri) {
+    clientOpts.loginUri = opts.uri;
+  }
+  return clientOpts;
+}
 
-  return resolve(cb, function(){
+function cliLogin(opts, cb) {
 
-    var clientOpts = {};
+  var clientOpts = createClientOpts(opts);
 
-    if(opts.test) {
-      clientOpts.environment = 'sandbox';
-    } else if(opts.uri) {
-      clientOpts.loginUri = opts.uri;
-    }
+  var client, oauth;
 
-    return sfClient.getClient(clientOpts)
+  return sfClient.getClient(clientOpts)
 
-    .then(function(client) {
+  .then(function(newClient) {
 
-      return new Promise(function(resolve, reject) {
+    client = newClient;
 
-        var authUri = client.getAuthUri({ responseType: 'token' });
+    return client.authenticateSOAP({
+      username: opts.user,
+      password: opts.pass,
+      securityToken: opts.token
+    });
+  })
 
-        logger.log('login starts...');
+  .then(function(newOauth) {
+    oauth = newOauth;
+    logger.log('received credentials');
+    logger.log('saving credentials for ' + opts.org);
+    return user.saveCredential(opts.org, oauth);
+  })
 
-        authServer.on('credentials', function(creds) {
-          logger.log('received credentials');
-          logger.log('shutting down server');
+  .then(function() {
+    return new Promise(function(resolve, reject) {
+      return index.run({ org: opts.org, oauth: oauth }, function(err, res) {
+        if(err) {
+          logger.error('unable to save index');
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+  })
 
-          authServer.close();
+  .catch(function(err) {
+    logger.error('authentication failed: ' + err.message);
+  });
+  
+}
 
-          creds.nick        = opts.org;
-          creds.org         = opts.org;
-          creds.environment = clientOpts.environment;
-          creds.loginUri    = opts.uri;
+function webLogin(opts, cb) {
 
-          logger.log('saving credentials for ' + opts.org);
+  var clientOpts = createClientOpts(opts);
 
-          user.saveCredential(opts.org, creds)
+  return sfClient.getClient(clientOpts)
 
-          .then(function(){
-            return index.run({ org: opts.org, oauth: creds}, function(err, res) {
-              if(err) {
-                logger.error('unable to save index');
-                reject(err);
-              } else {
-                resolve();
-              }
-            });
+  .then(function(client) {
+
+    return new Promise(function(resolve, reject) {
+
+      var authUri = client.getAuthUri({ responseType: 'token' });
+
+      authServer.on('credentials', function(creds) {
+        logger.log('received credentials');
+        logger.log('shutting down server');
+
+        authServer.close();
+
+        creds.nick        = opts.org;
+        creds.org         = opts.org;
+        creds.environment = clientOpts.environment;
+        creds.loginUri    = opts.uri;
+
+        logger.log('saving credentials for ' + opts.org);
+
+        user.saveCredential(opts.org, creds)
+
+        .then(function(){
+          return index.run({ org: opts.org, oauth: creds}, function(err, res) {
+            if(err) {
+              logger.error('unable to save index');
+              reject(err);
+            } else {
+              resolve();
+            }
           });
         });
+      });
 
-        authServer.listen(3835, function(err){
-          if(err) {
-            return reject(err);
-          }
-          logger.log('auth server started');
-          logger.log('redirect to the following uri');
-          logger.log(authUri);
-          open(authUri);
-        });
-
+      authServer.listen(3835, function(err){
+        if(err) {
+          return reject(err);
+        }
+        logger.log('auth server started');
+        logger.log('redirect to the following uri');
+        logger.log(authUri);
+        open(authUri);
       });
 
     });
 
   });
+}
 
+var run = module.exports.run = function(opts, cb) {
+  logger.log('login starting...');
+  if(opts.user) {
+    return cliLogin(opts, cb);
+  } else {
+    return webLogin(opts, cb);
+  }
 };
 
 var cli = module.exports.cli = function(program) {
   program.command('login <org>')
     .description('login to a Salesforce organization')
-    .option('-t, --test', 'login to a test environment')
-    .option('-u, --uri <uri>', 'specify a login uri')
+    .option('-u, --user <user>', 'specify a username for user/pass auth')
+    .option('-p, --pass <pass>', 'specify a password for user/pass auth')
+    .option('-t, --token <token>', 'specify a security token for user/pass auth')
+    .option('--test', 'login to a test environment')
+    .option('--uri <uri>', 'specify a login uri')
     .action(function(org, opts) {
       if(!org) cliUtil.fail('no org name specified');
       opts.org = org;

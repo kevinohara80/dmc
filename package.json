@@ -1,6 +1,6 @@
 {
   "name": "dmc",
-  "version": "1.0.0-22",
+  "version": "1.0.0-23",
   "description": "Cross-platform, developer cli tool for Salesforce",
   "main": "index.js",
   "scripts": {

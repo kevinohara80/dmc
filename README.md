@@ -203,7 +203,6 @@ submitting
 
 ## Roadmap
 
-* Implementation of `.dmcignore`
-* Execute anonymous
+* Anon script arguments
 * Test Execution
 * Lots of other stuff

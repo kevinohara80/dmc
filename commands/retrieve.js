@@ -21,7 +21,11 @@ var rimrafAsync = Promise.promisify(rimraf);
 
 var matchOpts = { matchBase: true };
 
-function getFilePaths(typeGroups, oauth, client) {
+function getFilePaths(typeGroups, opts, client) {
+
+  console.log('ns: ' + opts.ns);
+  console.log('all: ' + opts.all);
+
   return new Promise(function(resolve, reject) {
 
     var iterator = function(types, cb) {
@@ -42,7 +46,18 @@ function getFilePaths(typeGroups, oauth, client) {
 
         var filePaths = _(res)
           .flattenDeep()
+          .filter(function(r) {
+
+            if(opts.all) return true;
+
+            if(opts.ns) {
+              return (r.namespacePrefix && r.namespacePrefix.toLowerCase() === opts.ns.toLowerCase()); 
+            }
+
+            return _.isUndefined(r.namespacePrefix) || _.isNull(r.namespacePrefix);
+          })
           .map(function(md) {
+            console.log(md.fileName + '  ----->  ' + md.namespacePrefix);
             // sometimes salesforce responds with a weird
             // filename like Workflow/My_Object.object when
             // all other workflows fall into a directory like
@@ -208,7 +223,7 @@ var run = module.exports.run = function(opts, cb) {
       // group the metadata into groups of 3 since that's the limit
       // in a single listMetadata call
       var grouped = _.chunk(typeMatches, 3);
-      return getFilePaths(grouped, opts.oauth, client);
+      return getFilePaths(grouped, opts, client);
     })
 
     .then(function(fpaths){
@@ -275,6 +290,8 @@ module.exports.cli = function(program) {
     .description('retrieve metadata from target org')
     .option('-o, --org <org>', 'the Salesforce organization to use')
     .option('-r, --replace', 'replace all local metadata with the retrieved metadata')
+    .option('-a, --all', 'return all metadata including namespaced metadata')
+    .option('-n, --ns <ns>', 'return a specific namespace')
     .action(function(globs, opts) {
       opts.globs = globs;
       opts._loadOrg = true;

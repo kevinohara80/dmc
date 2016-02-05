@@ -37,6 +37,7 @@ loadCommand('open');
 loadCommand('identity');
 // loadCommand('create');
 loadCommand('deploy');
+loadCommand('test');
 loadCommand('retrieve');
 loadCommand('watch');
 // loadCommand('destroy');

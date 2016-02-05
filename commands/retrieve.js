@@ -8,7 +8,7 @@ var index     = require('../lib/index');
 var metaMap   = require('../lib/metadata-map');
 var async     = require('async');
 var Promise   = require('bluebird');
-var minimatch = require('minimatch');
+var matching  = require('../lib/matching');
 var paths     = require('../lib/paths');
 var fs        = require('../lib/fs');
 var glob      = require('glob');
@@ -17,9 +17,8 @@ var rimraf    = require('rimraf');
 var dmcignore = require('../lib/dmcignore');
 var resolve   = require('../lib/resolve');
 
-var rimrafAsync = Promise.promisify(rimraf);
 
-var matchOpts = { matchBase: true };
+var rimrafAsync = Promise.promisify(rimraf);
 
 function getFilePaths(typeGroups, opts, client) {
 
@@ -123,37 +122,6 @@ function getFilePaths(typeGroups, opts, client) {
   });
 }
 
-function filterOnGlobs(paths, ignores, globs) {
-  return _(paths)
-    .filter(function(p) {
-      var match = false;
-      var ignored = false;
-
-      // first process ignores from .gitignore
-      if(ignores && ignores.length) {
-        _.each(ignores, function(i) {
-          if(minimatch(p, i, matchOpts)) {
-            ignored = true;
-            return false;
-          }
-        });
-      }
-
-      if(ignored === true) return false;
-
-      // next process glob matches
-      _.each(globs, function(g) {
-        if(minimatch(p, g, matchOpts)) {
-          match = true;
-          return false;
-        }
-      });
-
-      return match;
-    })
-    .value();
-}
-
 function clearSrcDir() {
   return new Promise(function(resolve, reject) {
     rimraf('src/*', function(err) {
@@ -233,7 +201,7 @@ var run = module.exports.run = function(opts, cb) {
     return Promise.resolve()
 
     .then(function() {
-      dmcignore.load().then(function(lines) {
+      return dmcignore.load().then(function(lines) {
         ignores = lines;
       });
     })
@@ -264,7 +232,7 @@ var run = module.exports.run = function(opts, cb) {
       if(!fpaths || fpaths.length < 1) {
         throw new Error('no files found for retrieve');
       }
-      return filterOnGlobs(fpaths, ignores, opts.globs);
+      return matching.filterOnGlobs(fpaths, opts.globs, ignores);
     })
 
     .then(function(filteredPaths) {

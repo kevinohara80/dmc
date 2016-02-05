@@ -539,7 +539,7 @@ var run = module.exports.run = function(opts, cb) {
     .then(config.loadAll)
 
     .then(function(){
-      dmcignore.load().then(function(lines) {
+      return dmcignore.load().then(function(lines) {
         ignores = lines;
       });
     })

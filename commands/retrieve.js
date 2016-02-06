@@ -23,9 +23,6 @@ var matchOpts = { matchBase: true };
 
 function getFilePaths(typeGroups, opts, client) {
 
-  console.log('ns: ' + opts.ns);
-  console.log('all: ' + opts.all);
-
   return new Promise(function(resolve, reject) {
 
     var iterator = function(types, cb) {

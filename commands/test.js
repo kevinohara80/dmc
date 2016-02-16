@@ -174,7 +174,7 @@ var run = module.exports.run = function(opts, cb) {
           }
           if(t.Outcome === 'Fail') {
             hasFailures = true;
-            logger.error('[fail] ' + t.ApexClass.Name + ':' + t.MethodName + ' => ' + t.StackTrace);
+            logger.error('[fail] ' + t.ApexClass.Name + ':' + t.MethodName + ' => ' + t.Message + ' => ' +t.StackTrace);
           } else {
             logger.info(green('[pass] ') + t.ApexClass.Name + ':' + t.MethodName);
           }

@@ -7,6 +7,12 @@ var sfClient   = require('../lib/sf-client');
 var resolve    = require('../lib/resolve');
 var Handlebars = require('handlebars');
 
+// not enabling this right now
+// Handlebars.registerHelper('default', function(value, defaultValue) {
+//   var out = value || defaultValue || '';
+//   return new Handlebars.SafeString(out);
+// });
+
 function loadFile(filePath) {
   return fs.existsAsync(filePath)
     .then(function(exists) {
@@ -63,7 +69,6 @@ var run = module.exports.run = function(opts, cb) {
 
     .then(function(template) {
       logger.log('executing anonymous code');
-
       return client.tooling.executeAnonymous({
         oauth: opts.oauth,
         code: template(opts.arg || {})

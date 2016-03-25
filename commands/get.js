@@ -16,7 +16,6 @@ var run = module.exports.run = function(opts, cb) {
 
     .then(function(res) {
       logger.log('resp:');
-      console.log(res);
       return res;
     });
 

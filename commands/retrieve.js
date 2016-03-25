@@ -23,7 +23,6 @@ var rimrafAsync = Promise.promisify(rimraf);
 function getFilePaths(typeGroups, opts, client) {
 
   return new Promise(function(resolve, reject) {
-
     var iterator = function(types, cb) {
 
       types = _.map(types, function(t) {
@@ -74,6 +73,7 @@ function getFilePaths(typeGroups, opts, client) {
 
         var filePaths = _(res)
           .flattenDeep()
+          .compact()
           .filter(function(r) {
 
             if(opts.all) return true;
@@ -82,9 +82,8 @@ function getFilePaths(typeGroups, opts, client) {
               return (r.namespacePrefix && r.namespacePrefix.toLowerCase() === opts.ns.toLowerCase()); 
             }
 
-            return _.isUndefined(r.namespacePrefix) || _.isNull(r.namespacePrefix);
+            return _.isNull(r.namespacePrefix) || _.isUndefined(r.namespacePrefix) || r.namespacePrefix.length < 1;
           })
-          .compact()
           .map(function(md) {
             // this is already turned into a string by recursion
             if(_.isString(md)) return md;
@@ -190,6 +189,10 @@ var run = module.exports.run = function(opts, cb) {
   return resolve(cb, function(){
 
     var client;
+
+    if(!opts.globs || opts.globs.length === 0) {
+      opts.globs = ['src/**/*'];
+    }
 
     var map = metaMap.createMap({
       oauth: opts.oauth,

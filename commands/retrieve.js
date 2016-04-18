@@ -31,8 +31,15 @@ function getFilePaths(typeGroups, opts, client) {
         // first and recursively call the iterator to return the 
         // documents in the subfolder
         if(t.name === 'Document' && !t.subFolder) {
-          return { name: 'DocumentFolder' }
+          return { name: 'DocumentFolder' };
+        } else if(t.name === 'EmailTemplate' && !t.subFolder) {
+          return { name: 'EmailFolder' };
+        } else if(t.name === 'Report' && !t.subFolder) {
+          return { name: 'ReportFolder' };
+        } else if(t.name === 'Dashboard' && !t.subFolder) {
+          return { name: 'DashboardFolder' };
         }
+
         return t;
       });
 
@@ -53,6 +60,12 @@ function getFilePaths(typeGroups, opts, client) {
           .each(function(md) {
             if(md.type === 'DocumentFolder') {
               promises.push(iteratorAsync([{ name: 'Document', subFolder: md.fullName } ]));
+            } else if(md.type === 'EmailFolder') {
+              promises.push(iteratorAsync([{ name: 'EmailTemplate', subFolder: md.fullName } ]));
+            } else if(md.type === 'ReportFolder') {
+              promises.push(iteratorAsync([{ name: 'Report', subFolder: md.fullName } ]));
+            } else if(md.type === 'DashboardFolder') {
+              promises.push(iteratorAsync([{ name: 'Dashboard', subFolder: md.fullName } ]));
             } else {
               promises.push(Promise.resolve(md));
             }

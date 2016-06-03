@@ -178,6 +178,10 @@ src/pages/Foo*
 configuration options as well as override those at a project level.
 Setting up project-level configuration is completely optional.
 
+```bash
+$ dmc config:set api_version=36 # set Salesforce API version to use for this project
+```
+
 ## Contributing
 
 **CURRENTLY SEEKING WINDOWS TESTERS/CONTRIBUTORS**

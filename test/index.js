@@ -84,7 +84,7 @@ describe('lib/index.js', function() {
       }).then(function() {
         done();
       }).catch(function(err) {
-        err.should.not.exist;
+        should.not.exist(err);
         done(err);
       });
     });
@@ -96,7 +96,7 @@ describe('lib/index.js', function() {
       }).then(function() {
         done();
       }).catch(function(err) {
-        err.should.exist;
+        should.exist(err);
         done();
       });
     });
@@ -214,7 +214,7 @@ describe('lib/index.js', function() {
     });
 
     it('should fail on wrong case', function() {
-      should(idx.getTypeFromFolder('TRIGGERS')).be.undefined;
+      should.not.exist(idx.getTypeFromFolder('TRIGGERS'));
     });
 
   });

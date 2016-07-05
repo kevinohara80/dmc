@@ -31,11 +31,7 @@
   },
   "homepage": "https://github.com/kevinohara80/dmc",
   "devDependencies": {
-    "gulp": "^3.8.11",
-    "gulp-jshint": "^1.10.0",
-    "jshint-stylish": "^1.0.1",
     "mocha": "^2.0.1",
-    "run-sequence": "^1.0.2",
     "should": "^4.1.0"
   },
   "dependencies": {

@@ -46,7 +46,7 @@
     "cli-spinner": "^0.2.4",
     "colors": "^1.0.3",
     "commander": "^2.5.0",
-    "fs-extra": "^0.18.4",
+    "fs-extra": "^0.30.0",
     "glob": "^5.0.10",
     "handlebars": "^2.0.0",
     "lodash": "^3.10.1",

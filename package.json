@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "preversion": "npm test",
-    "test": "./node_modules/mocha/bin/mocha ./test"
+    "test": "./node_modules/mocha/bin/mocha ./test",
+    "postversion": "git push && git push --tags"
   },
   "preferGlobal": "true",
   "bin": {

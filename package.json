@@ -50,7 +50,7 @@
     "glob": "^5.0.10",
     "handlebars": "^2.0.0",
     "lodash": "^3.10.1",
-    "minimatch": "^2.0.8",
+    "minimatch": "^3.0.2",
     "nforce": "^1.4.1",
     "nforce-metadata": "^1.0.6",
     "nforce-tooling": "0.0.5",

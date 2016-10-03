@@ -48,19 +48,19 @@ describe('lib/config-schema', function() {
     });
 
     it('should convert floats to ints for int props', function(){
-      var input = configSchema.normalizeInput('api_version', 32.03);
+      var input = configSchema.normalizeInput('api_version', 37.03);
       should.exist(input.name);
       should.exist(input.value);
       input.name.should.equal('api_version');
-      input.value.should.equal(32);
+      input.value.should.equal(37);
     });
 
     it('should convert strings to ints for int props', function(){
-      var input = configSchema.normalizeInput('api_version', '32.03');
+      var input = configSchema.normalizeInput('api_version', '37.03');
       should.exist(input.name);
       should.exist(input.value);
       input.name.should.equal('api_version');
-      input.value.should.equal(32);
+      input.value.should.equal(37);
     });
 
   });
@@ -90,7 +90,7 @@ describe('lib/config-schema', function() {
     it('should return the default properties', function(){
       var cfg = configSchema.getDefaultConfig();
       cfg.should.have.property('default_org', null);
-      cfg.should.have.property('api_version', 32);
+      cfg.should.have.property('api_version', 37);
       cfg.should.have.property('colorize', true);
       cfg.should.have.property('log_level', 'info');
       cfg.should.have.property('background', 'light');

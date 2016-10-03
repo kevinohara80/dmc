@@ -48,7 +48,7 @@
     "lodash": "^3.10.1",
     "minimatch": "^3.0.2",
     "nforce": "^1.4.1",
-    "nforce-metadata": "^1.0.6",
+    "nforce-metadata": "^1.1.0",
     "nforce-tooling": "0.0.5",
     "node-watch": "^0.3.4",
     "open": "0.0.5",

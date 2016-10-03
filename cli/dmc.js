@@ -1,10 +1,23 @@
 #!/usr/bin/env node
-var colors  = require('colors');
-var program = require('commander');
-var logger  = require('../lib/logger');
-var version = require('../package.json').version;
-var user    = require('../lib/user');
-var config  = require('../lib/config');
+
+var colors         = require('colors');
+var program        = require('commander');
+var logger         = require('../lib/logger');
+var version        = require('../package.json').version;
+var user           = require('../lib/user');
+var config         = require('../lib/config');
+var updateNotifier = require('update-notifier');
+var package        = require('../package.json');
+
+var ONE_WEEK = 604800000;
+
+// notify on updates
+const notifier = updateNotifier({
+  pkg: package,
+  updateCheckInterval: ONE_WEEK 
+});
+
+notifier.notify();
 
 // set initial log level
 logger.setLogLevel(1);

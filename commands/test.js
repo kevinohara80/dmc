@@ -104,7 +104,7 @@ function runTests(client, tests, opts) {
       client.tooling.getAsyncTestResults({ ids: queueIds }, cb);
     }
 
-    client.tooling.runTestsAsync({ ids: testIds.join(',') }, function(err, res) {
+    client.tooling.runTestsAsyncPost({ ids: testIds.join(',') }, function(err, res) {
       if(err) return reject(err);
       spin.start();
       var jobId = res;

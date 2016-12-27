@@ -1,7 +1,8 @@
 dmc
 ===
 
-[![Build Status](https://travis-ci.org/kevinohara80/dmc.svg?branch=master)](https://travis-ci.org/kevinohara80/dmc)
+[![Build Status](https://travis-ci.org/kevinohara80/dmc.svg?branch=master)](https://travis-ci.org/kevinohara80/dmc) 
+[![npm version](https://badge.fury.io/js/dmc.svg)](https://badge.fury.io/js/dmc)
 
 *NOTE: `dmc` is currently in beta. Use at your own risk.*
 

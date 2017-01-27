@@ -38,6 +38,7 @@ var run = module.exports.run = function(opts) {
         meta: opts.meta
       }, function(err, res) {
         if(err) {
+          console.error(err);
           logger.error('deploy failed: re-watching files');
         } else {
           logger.success('deploy complete: re-watching files');

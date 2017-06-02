@@ -168,6 +168,7 @@ function createDeployArtifacts(map, containerId, client) {
 
 }
 
+//TOOLING API DEPLOY
 function deployContainer(containerId, client) {
 
   return new Promise(function(resolve, reject) {
@@ -211,11 +212,11 @@ function deployContainer(containerId, client) {
           if(resp.DeployDetails) {
             logDetails(resp.DeployDetails);
           }
-          
+
           return reject(new Error('Compiler Errors'));
         } else if(resp.State === 'Errored') {
           if(resp.ErrorMsg) logger.error(res.ErrorMsg);
-          return reject(new Error(res.ErrorMsg || 'an unknown error occcurred'));
+          return reject(new Error(res.ErrorMsg || 'Tooling API deploy failed. Check Salesforce for more details'));
         } else {
           setTimeout(function() {
             poll();
@@ -365,12 +366,10 @@ function logDetails(details, opts) {
     } else {
       logger.success('test results ====>');
     }
-    // console.error(details.runTestResult.codeCoverage);
-    // console.error(details.runTestResult.codeCoverageWarnings);
+
     logger.list('tests run: ' + details.runTestResult.numTestsRun);
     logger.list('failures: ' + details.runTestResult.numFailures);
-    logger.list('total time: ' + details.runTestResult.totalTime);
-
+    logger.list('total time: ' + details.runTestResult.totalTime/1000 +'s');
     var cc = details.runTestResult.codeCoverage;
 
     if(opts.coverage && cc && cc.length) {
@@ -429,7 +428,8 @@ function runMetadataDeploy(map, client, opts) {
       zipFile: archive,
       includeDetails: true,
       deployOptions: {
-        rollbackOnError: true
+        rollbackOnError: true,
+        runAllTests: opts.tests ? opts.tests : false
       }
     });
 
@@ -448,7 +448,7 @@ function runMetadataDeploy(map, client, opts) {
     }).catch(function(err) {
       if(err.details) {
         logDetails(err.details, opts);
-      } 
+      }
       if(err.message) {
         logger.error(err.message);
       }
@@ -573,7 +573,7 @@ var run = module.exports.run = function(opts, cb) {
 
       logger.log('deploy mode: ' + deployMode);
 
-      if(!map.requiresMetadataDeploy() && !opts.meta && deployMode !== 'metadata') {
+      if(!map.requiresMetadataDeploy() && !opts.meta && deployMode !== 'metadata' && !opts.tests) {
         logger.info('deploy api: ' + hl('tooling'));
         return runToolingDeploy(map, client);
       } else {
@@ -583,7 +583,7 @@ var run = module.exports.run = function(opts, cb) {
     });
 
   });
-  
+
 };
 
 module.exports.cli = function(program) {
@@ -592,6 +592,7 @@ module.exports.cli = function(program) {
     .option('-o, --org <org>', 'the Salesforce organization to use')
     .option('--coverage', 'show code coverage for tests run')
     .option('--meta', 'force deploy with metadata api')
+    .option('--tests', 'run all tests on deployment')
     .action(function(globs, opts) {
       opts.globs = globs;
       opts._loadOrg = true;

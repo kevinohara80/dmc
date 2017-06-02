@@ -14,48 +14,54 @@ var matchOpts = { matchBase: true };
 function loadTestClasses(client, opts) {
 
   return new Promise(function(resolve, reject) {
-    var nsArg = (opts.ns) ? 
-      '\'' + opts.ns + '\'' : 'null';
+    var nsArg = (opts.ns) ? '\'' + opts.ns + '\'' : null;
 
     var query = [
-      'SELECT Id, Name, SymbolTable',
+      'SELECT Id, Name, SymbolTable, IsValid',
       'FROM ApexClass',
-      (opts.all) ? '' : 'WHERE NamespacePrefix = ' + nsArg,
+      (opts.ns) ?  'WHERE NamespacePrefix = ' + nsArg : '',
       'ORDER BY Name'
     ].join(' ');
 
     client.tooling.query({ q: query }, function(err, res) {
       if(err) return reject(err);
-      logger.log('processing ' + res.records.length + ' records');
       var tests = _(res.records)
         .map(function(r) {
-          var rec = { 
-            Name: r.Name, 
+          var rec = {
+            Name: r.Name,
             Id: r.Id,
             isTest: false,
             filePath: 'src/classes/' + r.Name + '.cls',
             testMethods: []
           };
 
-          var td = r.SymbolTable.tableDeclaration;
-          var methods = r.SymbolTable.methods;
+          if(r.SymbolTable == null) {
+            if(!r.IsValid) {
+              logger.error('Dependent class is invalid and needs recompilation: ' + r.Name);
+            }
+          } else {
 
-          if(_.includes(td.modifiers, 'testMethod')) {
-            rec.isTest = true;
+            var td = r.SymbolTable.tableDeclaration;
+            var methods = r.SymbolTable.methods;
+
+            if(_.includes(td.modifiers, 'testMethod')) {
+              rec.isTest = true;
+            }
+
+            rec.testMethods = _(methods)
+              .filter(function(m) {
+                return _.includes(m.modifiers, 'testMethod');
+              })
+              .map(function(m) {
+                return m.name;
+              })
+              .value();
+
+            return rec;
           }
-
-          rec.testMethods = _(methods)
-            .filter(function(m) {
-              return _.includes(m.modifiers, 'testMethod');
-            })
-            .map(function(m) {
-              return m.name;
-            })
-            .value();
-
-          return rec;
         })
         .filter(function(r) {
+          if(r == null) return false;
           return r.isTest;
         })
         .filter(function(r) {
@@ -78,7 +84,6 @@ function runTests(client, tests, opts) {
     spin.setSpinnerString(19);
 
     function poll(jobId, cb) {
-      //logger.info('polling...');
       client.tooling.getAsyncTestStatus({ id: jobId }, function(err, res) {
         if(err) return cb(err);
 
@@ -96,7 +101,7 @@ function runTests(client, tests, opts) {
         setTimeout(function() {
           return poll(jobId, cb);
         }, 2000);
-        
+
       });
     }
 
@@ -123,7 +128,7 @@ function runTests(client, tests, opts) {
 }
 
 var run = module.exports.run = function(opts, cb) {
-  
+
   var client, ignores;
 
   // default to all classes
@@ -132,7 +137,7 @@ var run = module.exports.run = function(opts, cb) {
   }
 
   Promise.resolve()
-  
+
   .then(function() {
     return dmcignore.load().then(function(lines) {
       ignores = lines;
@@ -142,12 +147,12 @@ var run = module.exports.run = function(opts, cb) {
   .then(function(){
     return sfClient.getClient(opts.oauth);
   })
-  
+
   .then(function(c){
     client = c;
     return loadTestClasses(client, opts);
   })
-  
+
   .then(function(tests) {
     return matching.filterOnGlobs(tests, opts.globs, ignores);
   })
@@ -162,24 +167,32 @@ var run = module.exports.run = function(opts, cb) {
       logger.info('no tests found that match');
       return;
     }
-    
+
     return runTests(client, matchedTests, opts)
       .then(function(tests) {
         var hasFailures = false;
         var currentClass = null;
+        var totalTime = parseFloat(0);
+        var openingDelim = '===> ';
+        var closingDelim = ' <===';
+        var numberOfTests = tests.records.length;
         _.each(tests.records, function(t) {
           if(!currentClass || currentClass != t.ApexClass.Name) {
             currentClass = t.ApexClass.Name;
-            logger.log('===> ' + t.ApexClass.Name + ' test results <===');
+            logger.log(openingDelim + t.ApexClass.Name + ' test results' + closingDelim);
           }
+          var testTimeInSeconds = t.RunTime/1000 +'s';
+          totalTime += parseFloat(testTimeInSeconds);
           if(t.Outcome === 'Fail') {
             hasFailures = true;
-            logger.error('[fail] ' + t.ApexClass.Name + ':' + t.MethodName + ' => ' + t.Message + ' => ' +t.StackTrace);
+            logger.error('[fail] ' + t.ApexClass.Name + ': ' + t.MethodName + ' => ' + t.Message + ' => ' +t.StackTrace + ', time: ' + testTimeInSeconds);
           } else {
-            logger.info(green('[pass] ') + t.ApexClass.Name + ':' + t.MethodName);
+            logger.info(green('[pass] ') + t.ApexClass.Name + ': ' + t.MethodName + ', time: ' + testTimeInSeconds);
           }
         });
 
+        logger.log(openingDelim + 'Number of tests run: ' + numberOfTests + closingDelim);
+        logger.log(openingDelim + 'Total test time: ' + totalTime.toFixed(5) +'s' + closingDelim);
         return hasFailures
       });
   })
@@ -190,7 +203,7 @@ var run = module.exports.run = function(opts, cb) {
     }
     cb();
   })
-  
+
   .catch(function(err) {
     logger.error(err.message);
     cb(err);

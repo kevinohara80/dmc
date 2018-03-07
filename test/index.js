@@ -111,7 +111,8 @@ describe('lib/index.js', function() {
       var idx = index.init('test_index', {});
       idx.loadFromFile().then(function() {
         var result = idx.save();
-        should(result).be.an.Object.and.have.property('then').which.is.a.Function;
+        result.should.be.an.Object;
+        result.should.have.property('then').which.is.a.Function;
         done();
       });
     });

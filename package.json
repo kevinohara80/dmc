@@ -35,7 +35,7 @@
     "should": "^13.2.1"
   },
   "dependencies": {
-    "adm-zip": "^0.4.7",
+    "adm-zip": "^0.4.13",
     "archiver": "^1.1.0",
     "async": "^2.6.0",
     "bluebird": "^2.9.25",
@@ -44,11 +44,11 @@
     "commander": "^2.5.0",
     "fs-extra": "^0.30.0",
     "glob": "^5.0.10",
-    "handlebars": "^4.0.11",
+    "handlebars": "^4.1.2",
     "lodash": "^3.10.1",
     "minimatch": "^3.0.2",
-    "nforce": "^1.4.1",
-    "nforce-metadata": "^1.1.0",
+    "nforce": "^1.12.2",
+    "nforce-metadata": "^1.1.2",
     "nforce-tooling": "0.0.5",
     "node-watch": "^0.3.4",
     "open": "0.0.5",

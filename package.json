@@ -45,7 +45,7 @@
     "fs-extra": "^0.30.0",
     "glob": "^5.0.10",
     "handlebars": "^4.1.2",
-    "lodash": "^3.10.1",
+    "lodash": "^4.17.21",
     "minimatch": "^3.0.2",
     "nforce": "^1.12.2",
     "nforce-metadata": "^1.1.2",

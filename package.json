@@ -37,7 +37,7 @@
   "dependencies": {
     "adm-zip": "^0.4.13",
     "archiver": "^1.1.0",
-    "async": "^2.6.0",
+    "async": "^3.2.2",
     "bluebird": "^2.9.25",
     "cli-spinner": "^0.2.4",
     "colors": "^1.0.3",
